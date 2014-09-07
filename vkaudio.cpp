@@ -37,6 +37,8 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
     this->connect(ui->stop,       &QPushButton::clicked, m_player, &QMediaPlayer::stop);
     this->connect(ui->download,   &QPushButton::clicked, this, &VkAudio::downloadTrack);
     this->connect(ui->volume,     &QSlider::sliderMoved, m_player, &QMediaPlayer::setVolume);
+    this->connect(m_player,       &QMediaPlayer::mediaStatusChanged, this, &VkAudio::mediaStatus);
+    this->connect(ui->findTrack,  &QLineEdit::returnPressed, this, &VkAudio::filterTableAudio);
     this->connect(ui->position,   &QSlider::sliderMoved, this, [this](int msec)
     {
         m_player->setPosition(static_cast<qint64>(msec) * 1000);
@@ -52,7 +54,6 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
         ui->duration->display(displayTime.toString("mm:ss"));
 
     });
-    this->connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &VkAudio::mediaStatus);
     this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](qint64 msec)
     { ui->position->setRange(0, static_cast<int>(msec) / 1000); });
 }
@@ -65,6 +66,7 @@ VkAudio::~VkAudio()
 void VkAudio::updateListTrack(const QVector<std::tuple<Id, Artist, Title, Duration>>& infoTrack)
 {
     int currentRow = 0;
+    QStringList listCompleter;
     for(auto& track : infoTrack)
     {
         int id;
@@ -83,8 +85,12 @@ void VkAudio::updateListTrack(const QVector<std::tuple<Id, Artist, Title, Durati
         ui->tableAudio->setItem(currentRow, 1, titleItem);
         ui->tableAudio->setItem(currentRow, 2, durationItem);
         ui->tableAudio->setItem(currentRow, 3, idItem);
+        listCompleter<<artist<<title;
         currentRow += 1;
     }
+    m_completer = new QCompleter(listCompleter, this);
+    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+    ui->findTrack->setCompleter(m_completer);
 }
 
 void VkAudio::checkUrl(const QUrl& url)
@@ -134,7 +140,12 @@ void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
         else if(ui->streak->isChecked())
             nextTrackId = m_model->getNextIdTrack(m_currentIdPlayer);
         else if(ui->random->isChecked())
+        {
             nextTrackId = m_model->getRandomIdTrack(m_currentIdPlayer);
+            if(nextTrackId == -1)
+                nextTrackId = m_model->getNextIdTrack(m_currentIdPlayer);
+        }
+
 
         QUrl nextTrackUrl = m_model->findUrlTrack(nextTrackId);
         QString nextTrackName = m_model->findNameTrack(nextTrackId);
@@ -145,6 +156,25 @@ void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
                 break;
             }
         loadTrack(nextTrackUrl, nextTrackName, nextTrackId);
+    }
+}
+
+void VkAudio::filterTableAudio()
+{
+    QString filter = ui->findTrack->text();
+    for(int i = 0; i < ui->tableAudio->rowCount(); i++)
+    {
+        bool hide = false;
+        for(int j = 0; j < 2; j++)
+        {
+            QTableWidgetItem* item = ui->tableAudio->item(i, j);
+            if(item->text().contains(filter))
+            {
+                hide = true;
+                break;
+            }
+        }
+        ui->tableAudio->setRowHidden(i, !hide);
     }
 }
 
@@ -191,5 +221,6 @@ void VkAudio::setVisibleWebView(bool value)
     ui->repeat->setVisible(value);
     ui->random->setVisible(value);
     ui->streak->setVisible(value);
+    ui->findTrack->setVisible(value);
     ui->authentication->setVisible(!value);
 }

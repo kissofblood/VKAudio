@@ -35,6 +35,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QLineEdit" name="findTrack">
+         <property name="text">
+          <string>search</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QTableWidget" name="tableAudio"/>
        </item>
        <item>

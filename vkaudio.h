@@ -5,6 +5,7 @@
 #include "model.h"
 #include <QWidget>
 #include <tuple>
+#include <QCompleter>
 
 #include <QtWidgets>
 #include <QtMultimedia>
@@ -27,17 +28,18 @@ private slots:
     void playTrack(int row, int);
     void downloadTrack();
     void mediaStatus(QMediaPlayer::MediaStatus status);
+    void filterTableAudio();
 
 private:
     Ui::VkAudio     *ui                 = nullptr;
     Model           *m_model            = Model::getInstance();
     QMediaPlayer    *m_player           = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     QBuffer         *m_trackTmp         = new QBuffer(this);
+    QCompleter      *m_completer        = nullptr;
     bool            m_flagRequest       = true;
     int             m_currentIdPlayer   = -1;
 
     void loadTrack(const QUrl& urlTrack, const QString& nameTrack, int currentId);
-
     void setVisibleWebView(bool value);
 };
 
