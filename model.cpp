@@ -33,6 +33,29 @@ QString Model::findNameTrack(int id)
     return QString();
 }
 
+int Model::getNextIdTrack(int id)
+{
+    auto iter = std::find_if(m_infoTrack_.begin(), m_infoTrack_.end(), [id](const std::tuple<Id, Artist, Title, Duration, QUrl>& val)
+    { return std::get<0>(val) == id; });
+    if(iter + 1 != m_infoTrack_.end())
+        return std::get<0>(*(iter + 1));
+    return std::get<0>(*m_infoTrack_.begin());
+}
+
+int Model::getRandomIdTrack(int id)
+{
+    int loop = 0;
+    forever
+    {
+        int idRandom = std::get<0>(m_infoTrack_[qrand() % m_infoTrack_.size()]);
+        if(idRandom != id)
+            return idRandom;
+        loop += 1;
+        if(loop == 10)
+            return -1;
+    }
+}
+
 void Model::setUrlAudio(const QString& token)
 {
     QUrlQuery queryAudio("https://api.vk.com/method/audio.get.xml");

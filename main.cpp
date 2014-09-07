@@ -1,13 +1,12 @@
-#include "view.h"
-#include "controller.h"
+#include "vkaudio.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    View v;
-    v.show();
+    VkAudio vk;
+    vk.show();
 
     return a.exec();
 }
