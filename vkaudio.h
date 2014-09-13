@@ -2,7 +2,7 @@
 #define VKAUDIO_H
 
 #include "observer.h"
-#include "model.h"
+#include "modelaudio.h"
 #include <QWidget>
 #include <tuple>
 #include <QCompleter>
@@ -21,7 +21,8 @@ public:
     explicit VkAudio(QWidget* parent = nullptr);
     ~VkAudio() override;
 
-    void updateListTrack(const QVector<std::tuple<Id, Artist, Title, Duration>>& infoTrack) override;
+    void updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend) override;
+    void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack) override;
 
 private slots:
     void checkUrl(const QUrl& url);
@@ -32,7 +33,7 @@ private slots:
 
 private:
     Ui::VkAudio     *ui                 = nullptr;
-    Model           *m_model            = Model::getInstance();
+    ModelAudio      *m_modelAudio       = ModelAudio::getInstance();
     QMediaPlayer    *m_player           = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     QBuffer         *m_trackTmp         = new QBuffer(this);
     QCompleter      *m_completer        = nullptr;

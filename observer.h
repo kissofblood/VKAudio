@@ -2,23 +2,26 @@
 #define OBSERVER_H
 
 #include <QVector>
-#include <tuple>
 #include <QString>
+#include <QIcon>
+#include <tuple>
+
+using IdUser    = QString;
+using IdTrack   = QString;
+using Artist    = QString;
+using Title     = QString;
+using Duration  = int;
 
 namespace Observer {
 
 class AbstractObserver
 {
 public:
-    using Id        = int;
-    using Artist    = QString;
-    using Title     = QString;
-    using Duration  = int;
-
     AbstractObserver() = default;
     virtual ~AbstractObserver() = default;
 
-    virtual void updateListTrack(const QVector<std::tuple<Id, Artist, Title, Duration>>& infoTrack) = 0;
+    virtual void updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend) = 0;
+    virtual void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack) = 0;
 };
 
 class AbstractObservable
@@ -29,7 +32,8 @@ public:
 
     virtual void registerObserver(AbstractObserver* observer) = 0;
     virtual void removeObserver(AbstractObserver* observer) = 0;
-    virtual void notifyObservers() = 0;
+    virtual void notifyAudioObservers() = 0;
+    virtual void notifyFriendObservers() = 0;
 };
 
 }

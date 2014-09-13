@@ -27,9 +27,11 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
     ui->duration->setSegmentStyle(QLCDNumber::Flat);
     ui->streak->setChecked(true);
     ui->progressDownload->setVisible(false);
-    m_model->registerObserver(dynamic_cast<Observer::AbstractObserver*>(this));
+    ui->myPlaylist->setChecked(true);
+    m_modelAudio->registerObserver(dynamic_cast<Observer::AbstractObserver*>(this));
     setVisibleWebView(false);
 
+    this->connect(m_modelAudio, &ModelAudio::loadTrue, m_modelAudio, &ModelAudio::getPlaylistMy);
     this->connect(ui->authentication, &QWebView::urlChanged, this, &VkAudio::checkUrl);
     this->connect(ui->tableAudio, &QTableWidget::cellDoubleClicked, this, &VkAudio::playTrack);
     this->connect(ui->start,      &QPushButton::clicked, m_player, &QMediaPlayer::play);
@@ -63,16 +65,28 @@ VkAudio::~VkAudio()
     delete ui;
 }
 
-void VkAudio::updateListTrack(const QVector<std::tuple<Id, Artist, Title, Duration>>& infoTrack)
+void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend)
+{
+    for(auto& info : listFriend)
+    {
+        IdUser id;
+        QString name;
+        QIcon icon;
+        std::tie(id, name, icon) = info;
+        ui->cmbFriend->addItem(icon, name, QVariant(id));
+    }
+}
+
+void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack)
 {
     int currentRow = 0;
     QStringList listCompleter;
     for(auto& track : infoTrack)
     {
-        int id;
-        QString artist;
-        QString title;
-        int duration;
+        IdTrack id;
+        Artist artist;
+        Title title;
+        Duration duration;
         std::tie(id, artist, title, duration) = track;
         ui->tableAudio->setRowCount(ui->tableAudio->rowCount() + 1);
         QTableWidgetItem* artistItem = new QTableWidgetItem(artist);
@@ -80,7 +94,7 @@ void VkAudio::updateListTrack(const QVector<std::tuple<Id, Artist, Title, Durati
         int durationMsec = duration * 1000;
         QTime durationTime(0, (durationMsec / 60000) % 60, (durationMsec / 1000) % 60);
         QTableWidgetItem* durationItem = new QTableWidgetItem(durationTime.toString("mm:ss"));
-        QTableWidgetItem* idItem = new QTableWidgetItem(QString::number(id));
+        QTableWidgetItem* idItem = new QTableWidgetItem(id);
         ui->tableAudio->setItem(currentRow, 0, artistItem);
         ui->tableAudio->setItem(currentRow, 1, titleItem);
         ui->tableAudio->setItem(currentRow, 2, durationItem);
@@ -100,19 +114,19 @@ void VkAudio::checkUrl(const QUrl& url)
     if(token.length() == 0)
         return;
     setVisibleWebView(true);
-    m_model->setUrlAudio(token);
+    m_modelAudio->findPlaylist(token);
 }
 
 void VkAudio::playTrack(int row, int)
 {
-    if(!m_flagRequest)
+   /* if(!m_flagRequest)
         return;
     int currentId = ui->tableAudio->item(row, 3)->text().toInt();
     QUrl urlTrack = m_model->findUrlTrack(currentId);
     QString nameTrack = m_model->findNameTrack(currentId);
     if(urlTrack.isEmpty() || nameTrack.isEmpty())
         return;
-    loadTrack(urlTrack, nameTrack, currentId);
+    loadTrack(urlTrack, nameTrack, currentId);*/
 }
 
 void VkAudio::downloadTrack()
@@ -129,7 +143,7 @@ void VkAudio::downloadTrack()
 
 void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
 {
-    if(status == QMediaPlayer::EndOfMedia)
+   /* if(status == QMediaPlayer::EndOfMedia)
     {
         int nextTrackId = -1;
         if(ui->repeat->isChecked())
@@ -156,12 +170,12 @@ void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
                 break;
             }
         loadTrack(nextTrackUrl, nextTrackName, nextTrackId);
-    }
+    }*/
 }
 
 void VkAudio::filterTableAudio()
 {
-    QString filter = ui->findTrack->text();
+  /*  QString filter = ui->findTrack->text();
     for(int i = 0; i < ui->tableAudio->rowCount(); i++)
     {
         bool hide = false;
@@ -175,7 +189,7 @@ void VkAudio::filterTableAudio()
             }
         }
         ui->tableAudio->setRowHidden(i, !hide);
-    }
+    }*/
 }
 
 void VkAudio::loadTrack(const QUrl& urlTrack, const QString& nameTrack, int currentId)
