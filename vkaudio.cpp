@@ -9,7 +9,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
 
     ui->authentication->load(QUrl("https://oauth.vk.com/authorize?"
                                "client_id=4290375"
-                               "&scope=audio, ofline"
+                               "&scope=ofline"
                                "&redirect_uri=https://oauth.vk.com/blank.html"
                                "&display=mobile"
                                "&v=5.24"
@@ -76,14 +76,14 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
         ui->inputSearch->setEnabled(true);
         ui->findTrack->clear();
     });
+    this->connect(ui->inputSearch, &QLineEdit::returnPressed, this, [this]()
+    { m_modelAudio->globalSearchAudio(ui->inputSearch->text()); });
     this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](qint64 msec)
     { ui->position->setRange(0, static_cast<int>(msec) / 1000); });
 }
 
 VkAudio::~VkAudio()
-{
-    delete ui;
-}
+{ delete ui; }
 
 void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend)
 {

@@ -37,6 +37,7 @@ public:
     QString getRandomIdTrack(const QString& id);
     void setHideTrack(const QString& id, bool value);
     void findPlaylist(const QString& token);
+    void globalSearchAudio(const QString& artist);
     void registerObserver(Observer::AbstractObserver* observer) override;
     void removeObserver(Observer::AbstractObserver* observer) override;
     void notifyAudioObservers() override;
@@ -56,8 +57,9 @@ private slots:
 
 private:
     static ModelAudio                       *m_singleton;
-    QNetworkAccessManager                   *m_loadFriend   = new QNetworkAccessManager;
-    QNetworkAccessManager                   *m_loadAudio    = new QNetworkAccessManager;
+    QNetworkAccessManager                   *m_loadFriend       = new QNetworkAccessManager;
+    QNetworkAccessManager                   *m_loadAudio        = new QNetworkAccessManager;
+    QNetworkAccessManager                   *m_loadGlobalAudio  = new QNetworkAccessManager;
     QVector<QNetworkAccessManager*>         m_loadUser_;
     QVector<QNetworkAccessManager*>         m_loadIcon_;
     QVector<Observer::AbstractObserver*>    m_observer_;

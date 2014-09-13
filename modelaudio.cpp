@@ -231,6 +231,30 @@ void ModelAudio::findPlaylist(const QString& token)
     this->connect(m_loadFriend, &QNetworkAccessManager::finished, this, &ModelAudio::parserFriend);
 }
 
+void ModelAudio::globalSearchAudio(const QString& artist)
+{
+    m_vecInfoTrack_.clear();
+    m_hashInfoTrack_.clear();
+    QUrlQuery query("https://api.vk.com/method/audio.search.xml");
+    query.addQueryItem("q", artist);
+    query.addQueryItem("performer_only", "1");
+    query.addQueryItem("count", "300");
+    query.addQueryItem("v", "5.24");
+    query.addQueryItem("access_token", m_token);
+
+    QString result = query.toString();
+    for(int i = 0; i < result.length(); i++)
+        if(result[i] == '&')
+        {
+            result.replace(i, 1, '?');
+            break;
+        }
+    qDebug()<<result;
+    m_loadGlobalAudio->get(QNetworkRequest(QUrl(result)));
+
+    this->connect(m_loadGlobalAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
+}
+
 void ModelAudio::registerObserver(Observer::AbstractObserver* observer)
 { m_observer_.push_back(observer); }
 
