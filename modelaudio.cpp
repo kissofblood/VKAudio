@@ -9,7 +9,9 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
 {
     QDomDocument doc;
     doc.setContent(reply->readAll());
-    QDomNode nodeAudio = doc.documentElement().firstChild().nextSibling().firstChild();
+    QDomNode nodeAudio = doc.documentElement().firstChild();
+    m_vecInfoTrack_.reserve(nodeAudio.toElement().text().toInt());
+    nodeAudio = doc.documentElement().firstChild().nextSibling().firstChild();
     while(!nodeAudio.isNull())
     {
         QDomNode nodeInfoTrack = nodeAudio.toElement().firstChild();
@@ -36,6 +38,7 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
 
         m_vecInfoTrack_.push_back(qMakePair(true, std::make_tuple(artist, title, duration, url)));
         m_hashInfoTrack_.insert(id, m_vecInfoTrack_.end() - 1);
+
         nodeAudio = nodeAudio.nextSibling();
     }
 
@@ -164,14 +167,7 @@ ModelAudio* ModelAudio::getInstance()
 }
 
 QUrl ModelAudio::findUrlTrack(const QString& id)
-{
-
-}
-
-QString ModelAudio::findNameTrack(int id)
-{
-
-}
+{ return std::get<3>((*m_hashInfoTrack_[id]).second); }
 
 int ModelAudio::getNextIdTrack(int id)
 {

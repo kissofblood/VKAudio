@@ -33,7 +33,6 @@ public:
 
     static ModelAudio* getInstance();
     QUrl findUrlTrack(const QString& id);
-    QString findNameTrack(int id);
     int getNextIdTrack(int id);
     int getRandomIdTrack(int id);
     void findPlaylist(const QString& token);

@@ -30,7 +30,7 @@ private slots:
     void downloadTrack();
     void mediaStatus(QMediaPlayer::MediaStatus status);
     void filterTableAudio();
-    void loadAudio(int q);
+    void loadAudio(int);
 
 private:
     Ui::VkAudio     *ui                 = nullptr;
@@ -41,7 +41,7 @@ private:
     bool            m_flagRequest       = true;
     int             m_currentIdPlayer   = -1;
 
-    void loadTrack(const QUrl& urlTrack, const QString& nameTrack, int currentId);
+    void loadTrack(const QUrl& urlTrack, const QString& nameTrack, const QString& currentId);
     void setVisibleWebView(bool value);
 };
 
