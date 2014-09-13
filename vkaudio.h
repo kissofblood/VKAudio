@@ -39,7 +39,7 @@ private:
     QBuffer         *m_trackTmp         = new QBuffer(this);
     QCompleter      *m_completer        = nullptr;
     bool            m_flagRequest       = true;
-    int             m_currentIdPlayer   = -1;
+    QString         m_currentIdPlayer;
 
     void loadTrack(const QUrl& urlTrack, const QString& nameTrack, const QString& currentId);
     void setVisibleWebView(bool value);

@@ -168,34 +168,34 @@ void VkAudio::downloadTrack()
 
 void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
 {
-   /* if(status == QMediaPlayer::EndOfMedia)
+    if(status == QMediaPlayer::EndOfMedia)
     {
-        int nextTrackId = -1;
+        QString nextTrackId = "";
         if(ui->repeat->isChecked())
         {
             m_player->play();
             return;
         }
         else if(ui->streak->isChecked())
-            nextTrackId = m_model->getNextIdTrack(m_currentIdPlayer);
+            nextTrackId = m_modelAudio->getNextIdTrack(m_currentIdPlayer);
         else if(ui->random->isChecked())
-        {
-            nextTrackId = m_model->getRandomIdTrack(m_currentIdPlayer);
-            if(nextTrackId == -1)
-                nextTrackId = m_model->getNextIdTrack(m_currentIdPlayer);
-        }
+            nextTrackId = m_modelAudio->getRandomIdTrack(m_currentIdPlayer);
 
+        if(nextTrackId.length() == 0)
+            return;
 
-        QUrl nextTrackUrl = m_model->findUrlTrack(nextTrackId);
-        QString nextTrackName = m_model->findNameTrack(nextTrackId);
-        for(int i = 0; i < ui->tableAudio->rowCount(); i++)
-            if(ui->tableAudio->item(i, 3)->text().toInt() == nextTrackId)
+        QUrl nextTrackUrl = m_modelAudio->findUrlTrack(nextTrackId);
+        int currentRow = 0;
+        for(; currentRow < ui->tableAudio->rowCount(); currentRow++)
+            if(ui->tableAudio->item(currentRow, 3)->text() == nextTrackId)
             {
-                ui->tableAudio->setCurrentCell(i, 0);
+                ui->tableAudio->setCurrentCell(currentRow, 0);
                 break;
             }
+        QString nextTrackName = ui->tableAudio->item(currentRow, 0)->text() + " "
+                                + ui->tableAudio->item(currentRow, 1)->text();
         loadTrack(nextTrackUrl, nextTrackName, nextTrackId);
-    }*/
+    }
 }
 
 void VkAudio::filterTableAudio()
@@ -214,6 +214,7 @@ void VkAudio::filterTableAudio()
             }
         }
         ui->tableAudio->setRowHidden(i, !hide);
+        m_modelAudio->setHideTrack(ui->tableAudio->item(i, 3)->text(), !hide);
     }
 }
 
@@ -225,7 +226,7 @@ void VkAudio::loadAudio(int)
 
 void VkAudio::loadTrack(const QUrl& urlTrack, const QString& nameTrack, const QString& currentId)
 {
-    //m_currentIdPlayer = currentId;
+    m_currentIdPlayer = currentId;
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
     QNetworkReply* reply = manager->get(QNetworkRequest(urlTrack));
 

@@ -33,8 +33,9 @@ public:
 
     static ModelAudio* getInstance();
     QUrl findUrlTrack(const QString& id);
-    int getNextIdTrack(int id);
-    int getRandomIdTrack(int id);
+    QString getNextIdTrack(const QString& id);
+    QString getRandomIdTrack(const QString& id);
+    void setHideTrack(const QString& id, bool value);
     void findPlaylist(const QString& token);
     void registerObserver(Observer::AbstractObserver* observer) override;
     void removeObserver(Observer::AbstractObserver* observer) override;

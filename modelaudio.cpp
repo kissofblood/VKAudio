@@ -36,7 +36,7 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
             nodeInfoTrack = nodeInfoTrack.nextSibling();
         }
 
-        m_vecInfoTrack_.push_back(qMakePair(true, std::make_tuple(artist, title, duration, url)));
+        m_vecInfoTrack_.push_back(qMakePair(false, std::make_tuple(artist, title, duration, url)));
         m_hashInfoTrack_.insert(id, m_vecInfoTrack_.end() - 1);
 
         nodeAudio = nodeAudio.nextSibling();
@@ -167,17 +167,46 @@ ModelAudio* ModelAudio::getInstance()
 }
 
 QUrl ModelAudio::findUrlTrack(const QString& id)
-{ return std::get<3>((*m_hashInfoTrack_[id]).second); }
+{ return std::get<3>(m_hashInfoTrack_[id]->second); }
 
-int ModelAudio::getNextIdTrack(int id)
+QString ModelAudio::getNextIdTrack(const QString& id)
 {
-
+    auto iter = m_hashInfoTrack_[id];
+    if(iter + 1 == m_vecInfoTrack_.end())
+    {
+        if(iter->first != true)
+            return m_hashInfoTrack_.key(m_vecInfoTrack_.begin());
+        return "";
+    }
+    auto iterEnd = iter;
+    for(iter = iter + 1; iter != m_vecInfoTrack_.end(); iter++)
+        if(iter->first != true)
+            return m_hashInfoTrack_.key(iter);
+    for(auto i = m_vecInfoTrack_.begin(); i != iterEnd; i++)
+        if(i->first != true)
+            return m_hashInfoTrack_.key(i);
+    return "";
 }
 
-int ModelAudio::getRandomIdTrack(int id)
+QString ModelAudio::getRandomIdTrack(const QString& id)
 {
+    if(m_vecInfoTrack_.size() == 1)
+        return m_hashInfoTrack_.key(m_vecInfoTrack_.begin());
 
+    forever
+    {
+        int currentIndex = qrand() % m_vecInfoTrack_.size();
+        QString idRandom = m_hashInfoTrack_.key(m_vecInfoTrack_.begin() + currentIndex);
+        if(idRandom != id)
+            if(m_vecInfoTrack_[currentIndex].first != true)
+                return idRandom;
+
+    }
+    return "";
 }
+
+void ModelAudio::setHideTrack(const QString& id, bool value)
+{ m_hashInfoTrack_[id]->first = value; }
 
 void ModelAudio::findPlaylist(const QString& token)
 {
