@@ -147,7 +147,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="setFriend">
+           <widget class="QRadioButton" name="selectFriend">
             <property name="text">
              <string>friend</string>
             </property>

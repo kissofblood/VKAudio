@@ -30,6 +30,7 @@ private slots:
     void downloadTrack();
     void mediaStatus(QMediaPlayer::MediaStatus status);
     void filterTableAudio();
+    void loadAudio(int q);
 
 private:
     Ui::VkAudio     *ui                 = nullptr;

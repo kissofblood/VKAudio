@@ -81,7 +81,7 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
     {
         QUrlQuery queryUserFriend("https://api.vk.com/method/users.get.xml");
         queryUserFriend.addQueryItem("user_ids", id);
-        queryUserFriend.addQueryItem("fields", "photo_50");
+        queryUserFriend.addQueryItem("fields", "photo_100");
         queryUserFriend.addQueryItem("v", "5.24");
         queryUserFriend.addQueryItem("access_token", m_token);
         resutlFriend.push_back(queryUserFriend.toString());
@@ -131,7 +131,7 @@ QPair<IdUser, QPair<QString, QIcon>> ModelAudio::getResultParserUser(const QByte
             name = element.text() + " ";
         else if(element.tagName() == "last_name")
             name += element.text();
-        else if(element.tagName() == "photo_50")
+        else if(element.tagName() == "photo_100")
             photo = QUrl(element.text());
         nodeUser = nodeUser.nextSibling();
     }

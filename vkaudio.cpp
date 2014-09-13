@@ -28,10 +28,13 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
     ui->streak->setChecked(true);
     ui->progressDownload->setVisible(false);
     ui->myPlaylist->setChecked(true);
+    ui->cmbFriend->setEnabled(false);
+    ui->inputSearch->setEnabled(false);
     m_modelAudio->registerObserver(dynamic_cast<Observer::AbstractObserver*>(this));
     setVisibleWebView(false);
 
     this->connect(m_modelAudio, &ModelAudio::loadTrue, m_modelAudio, &ModelAudio::getPlaylistMy);
+    this->connect(ui->cmbFriend, SIGNAL(activated(int)), SLOT(loadAudio(int)));
     this->connect(ui->authentication, &QWebView::urlChanged, this, &VkAudio::checkUrl);
     this->connect(ui->tableAudio, &QTableWidget::cellDoubleClicked, this, &VkAudio::playTrack);
     this->connect(ui->start,      &QPushButton::clicked, m_player, &QMediaPlayer::play);
@@ -56,6 +59,22 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
         ui->duration->display(displayTime.toString("mm:ss"));
 
     });
+    this->connect(ui->myPlaylist, &QRadioButton::clicked, this, [this]()
+    {
+        ui->cmbFriend->setEnabled(false);
+        ui->inputSearch->setEnabled(false);
+        m_modelAudio->getPlaylistMy();
+    });
+    this->connect(ui->selectFriend, &QRadioButton::clicked, this, [this]()
+    {
+       ui->cmbFriend->setEnabled(true);
+       ui->inputSearch->setEnabled(false);
+    });
+    this->connect(ui->searchAudio, &QRadioButton::clicked, this, [this]()
+    {
+        ui->cmbFriend->setEnabled(false);
+        ui->inputSearch->setEnabled(true);
+    });
     this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](qint64 msec)
     { ui->position->setRange(0, static_cast<int>(msec) / 1000); });
 }
@@ -79,6 +98,8 @@ void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>
 
 void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack)
 {
+    ui->tableAudio->clear();
+    ui->tableAudio->setRowCount(0);
     int currentRow = 0;
     QStringList listCompleter;
     for(auto& track : infoTrack)
@@ -102,9 +123,9 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
         listCompleter<<artist<<title;
         currentRow += 1;
     }
-    m_completer = new QCompleter(listCompleter, this);
-    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
-    ui->findTrack->setCompleter(m_completer);
+    //m_completer = new QCompleter(listCompleter, this);
+   // m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+   // ui->findTrack->setCompleter(m_completer);
 }
 
 void VkAudio::checkUrl(const QUrl& url)
@@ -192,6 +213,11 @@ void VkAudio::filterTableAudio()
     }*/
 }
 
+void VkAudio::loadAudio(int)
+{
+    m_modelAudio->getPlaylistFriend(ui->cmbFriend->currentData().toString());
+}
+
 void VkAudio::loadTrack(const QUrl& urlTrack, const QString& nameTrack, int currentId)
 {
     m_currentIdPlayer = currentId;
@@ -236,5 +262,6 @@ void VkAudio::setVisibleWebView(bool value)
     ui->random->setVisible(value);
     ui->streak->setVisible(value);
     ui->findTrack->setVisible(value);
+    ui->grpFriendAudio->setVisible(value);
     ui->authentication->setVisible(!value);
 }
