@@ -249,7 +249,6 @@ void ModelAudio::globalSearchAudio(const QString& artist)
             result.replace(i, 1, '?');
             break;
         }
-    qDebug()<<result;
     m_loadGlobalAudio->get(QNetworkRequest(QUrl(result)));
 
     this->connect(m_loadGlobalAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);

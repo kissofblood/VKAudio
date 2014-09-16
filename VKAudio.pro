@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui webkitwidgets xml multimedia
+QT       += core gui webkitwidgets xml multimedia quick qml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,4 +24,7 @@ HEADERS  += widget.h \
 
 FORMS += \
     vkaudio.ui
+
+RESOURCES += \
+    resources.qrc
 
