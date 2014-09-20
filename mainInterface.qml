@@ -2,12 +2,12 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
+import QtQuick.Window 2.0
 
-ApplicationWindow {
+Item {
     property int widthGroove: 500
     property bool isPlay: true
 
-    visible: true
     width: 800
     height: 1280
 
@@ -16,7 +16,7 @@ ApplicationWindow {
         anchors.fill: parent
     }
 
-    toolBar: Rectangle {
+     Rectangle {
         id: player
         width: parent.width
         height: 60
@@ -24,7 +24,7 @@ ApplicationWindow {
 
         Rectangle {
             anchors.bottom: player.bottom
-            width: player.width
+            width: parent.width
             height: 5
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "#237b9c"; }
@@ -251,7 +251,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 style: {
                     widthGroove = 50
-                    styleSlider
+                    return styleSlider
                 }
                 value: 0
             }
@@ -306,6 +306,7 @@ ApplicationWindow {
 
     TextField {
         id: searchTrack
+        anchors.top: player.bottom
         width: parent.width
         height: 40
         font.pixelSize: 25
@@ -330,7 +331,7 @@ ApplicationWindow {
     ScrollView {
         anchors.top: searchTrack.bottom
         width: parent.width
-        height: parent.height - searchTrack.height
+        height: parent.height - searchTrack.height - player.height
         flickableItem.interactive: true
         style: ScrollViewStyle {
              transientScrollBars: true
@@ -355,7 +356,7 @@ ApplicationWindow {
 
         ListView {
             anchors.leftMargin: 6
-            model: model
+            model: vkAudioModel
             delegate: delegate
         }
     }
@@ -412,434 +413,4 @@ ApplicationWindow {
             }
         }
     }
-
-    ListModel {
-        id: model
-        ListElement  {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Dark Princess"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-
-
-        ListElement {
-            artist: "Amaranthe"
-            title: "Amaranthe"
-            duration: 2011
-        }
-
-        ListElement {
-            artist: "Dark Princess"
-            title: "Without you"
-            duration: 2005
-        }
-
-        ListElement {
-            artist: "Wihin Temptation"
-            title: "The Unforgiving"
-            duration: 2011
-        }
-    }
-
 }

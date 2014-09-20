@@ -1,18 +1,21 @@
 #ifndef VKAUDIO_H
 #define VKAUDIO_H
 
+#include "dataobject.h"
 #include "observer.h"
 #include "modelaudio.h"
 #include <QWidget>
-#include <tuple>
-#include <QCompleter>
+#include <QtQuick/QQuickView>
+#include <QtWebKitWidgets/QWebView>
+#include <QtQml/QQmlContext>
+#include <QUrl>
+#include <QUrlQuery>
+#include <QString>
+#include <QTime>
+#include <QVariant>
+#include <QList>
 
 #include <QtWidgets>
-#include <QtMultimedia>
-
-namespace Ui {
-class VkAudio;
-}
 
 class VkAudio : public QWidget, public Observer::AbstractObserver
 {
@@ -26,23 +29,12 @@ public:
 
 private slots:
     void checkUrl(const QUrl& url);
-    void playTrack(int row, int);
-    void downloadTrack();
-    void mediaStatus(QMediaPlayer::MediaStatus status);
-    void filterTableAudio();
-    void loadAudio(int);
 
 private:
-    Ui::VkAudio     *ui                 = nullptr;
+    QWebView        *m_authorization    = new QWebView;
+    QQuickView      *m_quickView        = new QQuickView;
+    QWidget         *m_quickWidget      = nullptr;
     ModelAudio      *m_modelAudio       = ModelAudio::getInstance();
-    QMediaPlayer    *m_player           = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
-    QBuffer         *m_trackTmp         = new QBuffer(this);
-    QCompleter      *m_completer        = nullptr;
-    bool            m_flagRequest       = true;
-    QString         m_currentIdPlayer;
-
-    void loadTrack(const QUrl& urlTrack, const QString& nameTrack, const QString& currentId);
-    void setVisibleWebView(bool value);
 };
 
 #endif // VKAUDIO_H

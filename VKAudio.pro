@@ -14,16 +14,17 @@ QMAKE_CXXFLAGS += -std=c++11
 
 
 SOURCES += main.cpp\
-    vkaudio.cpp \
-    modelaudio.cpp
+    modelaudio.cpp \
+    dataobject.cpp \
+    vkaudio.cpp
 
 HEADERS  += widget.h \
     observer.h \
-    vkaudio.h \
-    modelaudio.h
+    modelaudio.h \
+    dataobject.h \
+    vkaudio.h
 
-FORMS += \
-    vkaudio.ui
+FORMS +=
 
 RESOURCES += \
     resources.qrc

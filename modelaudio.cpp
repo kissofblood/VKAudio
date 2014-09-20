@@ -176,7 +176,7 @@ QString ModelAudio::getNextIdTrack(const QString& id)
     {
         if(iter->first != true)
             return m_hashInfoTrack_.key(m_vecInfoTrack_.begin());
-        return "";
+        return QString();
     }
     auto iterEnd = iter;
     for(iter = iter + 1; iter != m_vecInfoTrack_.end(); iter++)
@@ -185,7 +185,7 @@ QString ModelAudio::getNextIdTrack(const QString& id)
     for(auto i = m_vecInfoTrack_.begin(); i != iterEnd; i++)
         if(i->first != true)
             return m_hashInfoTrack_.key(i);
-    return "";
+    return QString();
 }
 
 QString ModelAudio::getRandomIdTrack(const QString& id)
@@ -202,7 +202,7 @@ QString ModelAudio::getRandomIdTrack(const QString& id)
                 return idRandom;
 
     }
-    return "";
+    return QString();
 }
 
 void ModelAudio::setHideTrack(const QString& id, bool value)

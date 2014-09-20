@@ -1,89 +1,32 @@
 #include "vkaudio.h"
-#include "ui_vkaudio.h"
 
-VkAudio::VkAudio(QWidget* parent) : QWidget(parent),
-    ui(new Ui::VkAudio)
+VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 {
-    ui->setupUi(this);
-    this->resize(800, 500);
-
-    ui->authentication->load(QUrl("https://oauth.vk.com/authorize?"
+    m_quickView->setSource(QUrl("qrc:/mainInterface.qml"));
+    m_quickView->setResizeMode(QQuickView::SizeRootObjectToView);
+    m_authorization->load(QUrl("https://oauth.vk.com/authorize?"
                                "client_id=4290375"
                                "&scope=ofline"
                                "&redirect_uri=https://oauth.vk.com/blank.html"
                                "&display=mobile"
                                "&v=5.24"
                                "&response_type=token"));
-    ui->tableAudio->setColumnCount(4);
-    ui->tableAudio->setHorizontalHeaderLabels({ "artist", "title", "duration" });
-    ui->tableAudio->setColumnHidden(3, true);
-    ui->tableAudio->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableAudio->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableAudio->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->tableAudio->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->volume->setRange(0, 100);
-    ui->volume->setValue(100);
-    ui->duration->display(QTime(0, 0, 0).toString("mm:ss"));
-    ui->duration->setSegmentStyle(QLCDNumber::Flat);
-    ui->streak->setChecked(true);
-    ui->progressDownload->setVisible(false);
-    ui->myPlaylist->setChecked(true);
-    ui->cmbFriend->setEnabled(false);
-    ui->inputSearch->setEnabled(false);
-    m_modelAudio->registerObserver(dynamic_cast<Observer::AbstractObserver*>(this));
-    setVisibleWebView(false);
+    m_quickWidget = QWidget::createWindowContainer(m_quickView);
+    m_quickWidget->setVisible(false);
+    m_modelAudio->registerObserver(this);
 
-    this->connect(ui->cmbFriend, SIGNAL(activated(int)), SLOT(loadAudio(int)));
+    QHBoxLayout* box = new QHBoxLayout;
+    box->addWidget(m_authorization);
+    box->addWidget(m_quickWidget);
+    box->setMargin(0);
+    this->setLayout(box);
+
     this->connect(m_modelAudio, &ModelAudio::loadTrue, m_modelAudio, &ModelAudio::getPlaylistMy);
-    this->connect(ui->authentication, &QWebView::urlChanged, this, &VkAudio::checkUrl);
-    this->connect(ui->tableAudio, &QTableWidget::cellDoubleClicked, this, &VkAudio::playTrack);
-    this->connect(ui->start,      &QPushButton::clicked, m_player, &QMediaPlayer::play);
-    this->connect(ui->pause,      &QPushButton::clicked, m_player, &QMediaPlayer::pause);
-    this->connect(ui->stop,       &QPushButton::clicked, m_player, &QMediaPlayer::stop);
-    this->connect(ui->download,   &QPushButton::clicked, this, &VkAudio::downloadTrack);
-    this->connect(ui->volume,     &QSlider::sliderMoved, m_player, &QMediaPlayer::setVolume);
-    this->connect(m_player,       &QMediaPlayer::mediaStatusChanged, this, &VkAudio::mediaStatus);
-    this->connect(ui->findTrack,  &QLineEdit::returnPressed, this, &VkAudio::filterTableAudio);
-    this->connect(ui->position,   &QSlider::sliderMoved, this, [this](int msec)
-    {
-        m_player->setPosition(static_cast<qint64>(msec) * 1000);
-
-        QTime displayTime(0, (msec / 60000) % 60, (msec / 1000) % 60);
-        ui->duration->display(displayTime.toString("mm:ss"));
-    });
-    this->connect(m_player, &QMediaPlayer::positionChanged, this, [this](qint64 msec)
-    {
-        ui->position->setValue(static_cast<int>(msec) / 1000);
-
-        QTime displayTime(0, (msec / 60000) % 60, (msec / 1000) % 60);
-        ui->duration->display(displayTime.toString("mm:ss"));
-
-    });
-    this->connect(ui->myPlaylist, &QRadioButton::clicked, this, [this]()
-    {
-        ui->cmbFriend->setEnabled(false);
-        ui->inputSearch->setEnabled(false);
-        m_modelAudio->getPlaylistMy();
-    });
-    this->connect(ui->selectFriend, &QRadioButton::clicked, this, [this]()
-    {
-       ui->cmbFriend->setEnabled(true);
-       ui->inputSearch->setEnabled(false);
-    });
-    this->connect(ui->searchAudio, &QRadioButton::clicked, this, [this]()
-    {
-        ui->cmbFriend->setEnabled(false);
-        ui->inputSearch->setEnabled(true);
-        ui->findTrack->clear();
-    });
-    this->connect(ui->inputSearch, &QLineEdit::returnPressed, this, [this]()
-    { m_modelAudio->globalSearchAudio(ui->inputSearch->text()); });
-    this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](qint64 msec)
-    { ui->position->setRange(0, static_cast<int>(msec) / 1000); });
+    this->connect(m_authorization, &QWebView::urlChanged, this, &VkAudio::checkUrl);
 }
 
 VkAudio::~VkAudio()
-{ delete ui; }
+{ delete m_quickView; }
 
 void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend)
 {
@@ -93,18 +36,14 @@ void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>
         QString name;
         QIcon icon;
         std::tie(id, name, icon) = info;
-        ui->cmbFriend->addItem(icon, name, QVariant(id));
+        //qDebug()<<id<<name;
+        //ui->cmbFriend->addItem(icon, name, QVariant(id));
     }
 }
 
 void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack)
 {
-    delete m_completer;
-    m_completer = nullptr;
-    ui->tableAudio->clearContents();
-    ui->tableAudio->setRowCount(0);
-    int currentRow = 0;
-    QStringList listCompleter;
+    QList<QObject*> dataList;
     for(auto& track : infoTrack)
     {
         QString id;
@@ -112,23 +51,14 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
         Title title;
         Duration duration;
         std::tie(id, artist, title, duration) = track;
-        ui->tableAudio->setRowCount(ui->tableAudio->rowCount() + 1);
-        QTableWidgetItem* artistItem = new QTableWidgetItem(artist);
-        QTableWidgetItem* titleItem = new QTableWidgetItem(title);
         int durationMsec = duration * 1000;
         QTime durationTime(0, (durationMsec / 60000) % 60, (durationMsec / 1000) % 60);
-        QTableWidgetItem* durationItem = new QTableWidgetItem(durationTime.toString("mm:ss"));
-        QTableWidgetItem* idItem = new QTableWidgetItem(id);
-        ui->tableAudio->setItem(currentRow, 0, artistItem);
-        ui->tableAudio->setItem(currentRow, 1, titleItem);
-        ui->tableAudio->setItem(currentRow, 2, durationItem);
-        ui->tableAudio->setItem(currentRow, 3, idItem);
-        listCompleter<<artist<<title;
-        currentRow += 1;
+        auto rrr = new DataObject(artist, title, durationTime.toString("mm:ss"), id, this);
+        dataList.push_back(rrr);
     }
-    m_completer = new QCompleter(listCompleter, this);
-    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
-    ui->findTrack->setCompleter(m_completer);
+
+    QQmlContext* context = m_quickView->rootContext();
+    context->setContextProperty("vkAudioModel", QVariant::fromValue(dataList));
 }
 
 void VkAudio::checkUrl(const QUrl& url)
@@ -137,137 +67,7 @@ void VkAudio::checkUrl(const QUrl& url)
     QString token = query.queryItemValue("access_token");
     if(token.length() == 0)
         return;
-    setVisibleWebView(true);
+    m_authorization->setVisible(false);
+    m_quickWidget->setVisible(true);
     m_modelAudio->findPlaylist(token);
-}
-
-void VkAudio::playTrack(int row, int)
-{
-    if(!m_flagRequest)
-        return;
-    QString currentId = ui->tableAudio->item(row, 3)->text();
-    QUrl urlTrack = m_modelAudio->findUrlTrack(currentId);
-    QString nameTrack = ui->tableAudio->item(row, 0)->text() + " " +
-                        ui->tableAudio->item(row, 1)->text();
-    if(urlTrack.isEmpty() || nameTrack.isEmpty())
-        return;
-    loadTrack(urlTrack, nameTrack, currentId);
-}
-
-void VkAudio::downloadTrack()
-{
-    if(!m_trackTmp->isOpen())
-        return;
-
-    QString pathFile = QFileDialog::getSaveFileName(this, "Save File", ui->nameTrack->text(), ".mp3");
-    QFile fileSave(pathFile + ".mp3");
-    if(fileSave.open(QIODevice::WriteOnly))
-        fileSave.write(m_trackTmp->buffer());
-    fileSave.close();
-}
-
-void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
-{
-    if(status == QMediaPlayer::EndOfMedia)
-    {
-        QString nextTrackId = "";
-        if(ui->repeat->isChecked())
-        {
-            m_player->play();
-            return;
-        }
-        else if(ui->streak->isChecked())
-            nextTrackId = m_modelAudio->getNextIdTrack(m_currentIdPlayer);
-        else if(ui->random->isChecked())
-            nextTrackId = m_modelAudio->getRandomIdTrack(m_currentIdPlayer);
-
-        if(nextTrackId.length() == 0)
-            return;
-
-        QUrl nextTrackUrl = m_modelAudio->findUrlTrack(nextTrackId);
-        int currentRow = 0;
-        for(; currentRow < ui->tableAudio->rowCount(); currentRow++)
-            if(ui->tableAudio->item(currentRow, 3)->text() == nextTrackId)
-            {
-                ui->tableAudio->setCurrentCell(currentRow, 0);
-                break;
-            }
-        QString nextTrackName = ui->tableAudio->item(currentRow, 0)->text() + " "
-                                + ui->tableAudio->item(currentRow, 1)->text();
-        loadTrack(nextTrackUrl, nextTrackName, nextTrackId);
-    }
-}
-
-void VkAudio::filterTableAudio()
-{
-    QString filter = ui->findTrack->text();
-    for(int i = 0; i < ui->tableAudio->rowCount(); i++)
-    {
-        bool hide = false;
-        for(int j = 0; j < 2; j++)
-        {
-            QTableWidgetItem* item = ui->tableAudio->item(i, j);
-            if(item->text().contains(filter))
-            {
-                hide = true;
-                break;
-            }
-        }
-        ui->tableAudio->setRowHidden(i, !hide);
-        m_modelAudio->setHideTrack(ui->tableAudio->item(i, 3)->text(), !hide);
-    }
-}
-
-void VkAudio::loadAudio(int)
-{
-    m_modelAudio->getPlaylistFriend(ui->cmbFriend->currentData().toString());
-    ui->findTrack->clear();
-}
-
-void VkAudio::loadTrack(const QUrl& urlTrack, const QString& nameTrack, const QString& currentId)
-{
-    m_currentIdPlayer = currentId;
-    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
-    QNetworkReply* reply = manager->get(QNetworkRequest(urlTrack));
-
-    this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    {
-        if(static_cast<int>(total) < 0)
-            return;
-        m_flagRequest = false;
-        ui->progressDownload->setVisible(true);
-        ui->progressDownload->setValue(100 * received / total);
-    });
-    this->connect(manager, &QNetworkAccessManager::finished, [this, nameTrack, urlTrack](QNetworkReply* reply)
-    {
-        m_trackTmp->close();
-        m_trackTmp->setData(reply->readAll());
-        m_trackTmp->open(QIODevice::ReadOnly);
-
-        m_player->setMedia(nullptr, m_trackTmp);
-        m_player->play();
-
-        ui->nameTrack->setText(nameTrack);
-        ui->progressDownload->setVisible(false);
-        m_flagRequest = true;
-    });
-}
-
-void VkAudio::setVisibleWebView(bool value)
-{
-    ui->download->setVisible(value);
-    ui->tableAudio->setVisible(value);
-    ui->position->setVisible(value);
-    ui->duration->setVisible(value);
-    ui->start->setVisible(value);
-    ui->pause->setVisible(value);
-    ui->stop->setVisible(value);
-    ui->volume->setVisible(value);
-    ui->nameTrack->setVisible(value);
-    ui->repeat->setVisible(value);
-    ui->random->setVisible(value);
-    ui->streak->setVisible(value);
-    ui->findTrack->setVisible(value);
-    ui->grpFriendAudio->setVisible(value);
-    ui->authentication->setVisible(!value);
 }
