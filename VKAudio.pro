@@ -12,7 +12,6 @@ TARGET = VKAudio
 TEMPLATE = app
 QMAKE_CXXFLAGS += -std=c++11
 
-
 SOURCES += main.cpp\
     modelaudio.cpp \
     dataobject.cpp \
@@ -23,8 +22,6 @@ HEADERS  += widget.h \
     modelaudio.h \
     dataobject.h \
     vkaudio.h
-
-FORMS +=
 
 RESOURCES += \
     resources.qrc

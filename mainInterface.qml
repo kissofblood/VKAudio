@@ -2,27 +2,38 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
-import QtQuick.Window 2.0
 
 Item {
+    id: item
     property int widthGroove: 500
     property bool isPlay: true
+    signal selectIdTrack(string id)
 
     width: 800
     height: 1280
+
+    Connections {
+        target: connectVkAudio
+        onProgressDownloadValue: progressBar.value = value
+        onMediaPositionChanged: {
+            positionTrack.value = position
+            durationTrack.text = duration
+        }
+        onMediaDurationChanged: positionTrack.maximumValue = duration
+    }
 
     Rectangle {
         color: "#212126"
         anchors.fill: parent
     }
 
-     Rectangle {
+    Rectangle {
         id: player
         width: parent.width
         height: 60
         color: "black"
 
-        Rectangle {
+    Rectangle {
             anchors.bottom: player.bottom
             width: parent.width
             height: 5
@@ -134,7 +145,7 @@ Item {
                     groove: Item {
                         id: groovItem
                         implicitHeight: 8
-                        implicitWidth: widthGroove
+                        implicitWidth: 100
 
                         Rectangle {
                             height: 8
@@ -164,19 +175,21 @@ Item {
                         Layout.fillWidth: true
                         font.pixelSize: 20
                         color: "white"
-                        text: "Widget Gallery"
+                        text: ""
                     }
 
                     Text {
                         id: durationTrack
                         font.pixelSize: 20
                         color: "white"
-                        text: "12:12"
+                        text: "0:0"
                     }
 
                 }
 
                 Slider {
+                    id: positionTrack
+                    minimumValue: 0
                     Layout.fillWidth: true
                     style: styleSlider
                     value: 0
@@ -329,9 +342,10 @@ Item {
     }
 
     ScrollView {
+        id: scrollView
         anchors.top: searchTrack.bottom
         width: parent.width
-        height: parent.height - searchTrack.height - player.height
+        height: parent.height - searchTrack.height - player.height - progressBar.height
         flickableItem.interactive: true
         style: ScrollViewStyle {
              transientScrollBars: true
@@ -355,62 +369,88 @@ Item {
          }
 
         ListView {
+            id: listView
             anchors.leftMargin: 6
             model: vkAudioModel
-            delegate: delegate
+            delegate: Item {
+                width: parent.width
+                height: 70
+
+                Rectangle {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    height: 1
+                    color: "#424246"
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.rightMargin: 8
+                    color: "#11ffffff"
+                    visible: mouseDelegate.pressed
+                }
+
+                MouseArea {
+                    id: mouseDelegate
+                    anchors.fill: parent
+                    onClicked: {
+                        listView.currentIndex = model.index
+                        var index = listView.currentIndex
+                        nameTrack.text = vkAudioModel[index].artist + " - " + vkAudioModel[index].title
+                        item.selectIdTrack(vkAudioModel[index].idTrack)
+                    }
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "white"
+                    text: artist
+                    font.pixelSize: 15
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.centerIn: parent
+                    color: "white"
+                    text: title
+                    font.pointSize: 11
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: parent.right
+                    anchors.rightMargin: 15
+                    color: "white"
+                    text: duration
+                    font.pointSize: 11
+                }
+            }
         }
     }
 
-    Component {
-        id: delegate
+    ProgressBar {
+        id: progressBar
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: 20
+        value: 0
+        maximumValue: 100
+        minimumValue: 0
+        style: ProgressBarStyle {
+            panel: Rectangle {
+                color: "#444"
+                opacity: 0.8
 
-        Item {
-            width: parent.width
-            height: 70
-
-            Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.rightMargin: 8
-                height: 1
-                color: "#424246"
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                anchors.rightMargin: 8
-                color: "#11ffffff"
-                visible: mouseDelegate.pressed
-            }
-
-            MouseArea {
-                id: mouseDelegate
-                anchors.fill: parent
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                color: "white"
-                text: artist
-                font.pixelSize: 15
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.centerIn: parent
-                color: "white"
-                text: title
-                font.pointSize: 11
-            }
-
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.right
-                anchors.rightMargin: 20
-                color: "white"
-                text: duration
-                font.pointSize: 11
+                Rectangle {
+                    antialiasing: true
+                    radius: 1
+                    color: "#468bb7"
+                    height: parent.height
+                    width: parent.width * control.value / control.maximumValue
+                }
             }
         }
     }
 }
+

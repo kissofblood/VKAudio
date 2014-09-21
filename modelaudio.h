@@ -27,11 +27,8 @@ class ModelAudio : public QObject, public Observer::AbstractObservable
 
     using InfoTrack = QPair<bool, std::tuple<Artist, Title, Duration, QUrl>>;
 public:
-    ModelAudio(const ModelAudio&) = delete;
+    explicit ModelAudio(QObject* parent = nullptr);
     ~ModelAudio() override;
-    ModelAudio& operator =(const ModelAudio&) = delete;
-
-    static ModelAudio* getInstance();
     QUrl findUrlTrack(const QString& id);
     QString getNextIdTrack(const QString& id);
     QString getRandomIdTrack(const QString& id);
@@ -56,7 +53,6 @@ private slots:
     void parserUser(QNetworkReply* reply);
 
 private:
-    static ModelAudio                       *m_singleton;
     QNetworkAccessManager                   *m_loadFriend       = new QNetworkAccessManager;
     QNetworkAccessManager                   *m_loadAudio        = new QNetworkAccessManager;
     QNetworkAccessManager                   *m_loadGlobalAudio  = new QNetworkAccessManager;
@@ -69,8 +65,6 @@ private:
     QPair<IdUser, QPair<QString, QIcon>> m_infoMy;
     QString m_token;
     int m_countFriend = 0;
-
-    ModelAudio();
 
     QPair<IdUser, QPair<QString, QIcon>> getResultParserUser(const QByteArray& array);
 };

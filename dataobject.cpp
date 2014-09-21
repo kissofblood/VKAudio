@@ -7,7 +7,7 @@ DataObject::DataObject(const QString& artist, const QString& title, const QStrin
     , m_artist(artist)
     , m_title(title)
     , m_duration(duration)
-    , m_id(id)
+    , m_idTrack(id)
 { }
 
 QString DataObject::artist() const
@@ -46,6 +46,28 @@ void DataObject::setDuration(const QString& duration)
     }
 }
 
-QString DataObject::getId() const
-{ return m_id; }
+QString DataObject::idTrack() const
+{ return m_idTrack; }
+
+void DataObject::setIdTrack(const QString& idTrack)
+{
+    if(idTrack != m_idTrack)
+    {
+        m_idTrack = idTrack;
+        emit idTrackChanged();
+    }
+}
+
+bool DataObject::hide() const
+{ return m_hide; }
+
+void DataObject::setHide(bool hide)
+{
+    if(hide != m_hide)
+    {
+        m_hide = hide;
+        emit hideChanged();
+    }
+}
+
 

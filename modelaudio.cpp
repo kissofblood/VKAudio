@@ -1,8 +1,6 @@
 #include "modelaudio.h"
 
-ModelAudio* ModelAudio::m_singleton = nullptr;
-
-ModelAudio::ModelAudio() : QObject(nullptr)
+ModelAudio::ModelAudio(QObject* parent) : QObject(parent)
 { }
 
 void ModelAudio::parserAudio(QNetworkReply* reply)
@@ -156,14 +154,6 @@ ModelAudio::~ModelAudio()
     std::for_each(m_loadIcon_.begin(), m_loadIcon_.end(), std::bind(&QNetworkAccessManager::deleteLater, std::placeholders::_1));
     delete m_loadAudio;
     delete m_loadFriend;
-    delete m_singleton;
-}
-
-ModelAudio* ModelAudio::getInstance()
-{
-    if(m_singleton == nullptr)
-        m_singleton = new ModelAudio;
-    return m_singleton;
 }
 
 QUrl ModelAudio::findUrlTrack(const QString& id)
