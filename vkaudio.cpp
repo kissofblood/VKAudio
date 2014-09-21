@@ -13,6 +13,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
                                "&response_type=token"));
     m_quickWidget = QWidget::createWindowContainer(m_quickView);
     m_quickWidget->setVisible(false);
+    //m_authorization->setVisible(false);
     m_modelAudio->registerObserver(this);
     m_quickView->rootContext()->setContextProperty("connectVkAudio", this);
 
@@ -31,7 +32,13 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     });
     this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](quint64 duration)
     { emit mediaDurationChanged(duration / 1000); });
-    this->connect(m_quickView->rootObject(), SIGNAL(selectIdTrack(QString)), SLOT(urlTrack(QString)));
+    this->connect(m_quickView->rootObject(), SIGNAL(selectIdTrack(QString)),    SLOT(urlTrack(QString)));
+    this->connect(m_quickView->rootObject(), SIGNAL(positionTrackChange(int)),  SLOT(setPositionPlayer(int)));
+    this->connect(m_quickView->rootObject(), SIGNAL(selectPlayTrack()),         m_player, SLOT(play()));
+    this->connect(m_quickView->rootObject(), SIGNAL(selectPauseTrack()),        m_player, SLOT(pause()));
+    this->connect(m_quickView->rootObject(), SIGNAL(volumeTrackChange(int)),    m_player, SLOT(setVolume(int)));
+    this->connect(m_quickView->rootObject(), SIGNAL(selectNextTrack(QString)), SLOT(setNextTrack(QString)));
+    this->connect(m_quickView->rootObject(), SIGNAL(selectPrevTrack(QString)), SLOT(setPrevTrack(QString)));
 }
 
 VkAudio::~VkAudio()
@@ -102,4 +109,21 @@ void VkAudio::urlTrack(const QString& id)
         m_player->play();
         QTimer::singleShot(100, this, SIGNAL(progressDownloadValue()));
     });
+}
+
+void VkAudio::setPositionPlayer(int position)
+{ m_player->setPosition(static_cast<qint64>(position) * 1000); }
+
+void VkAudio::setNextTrack(const QString& id)
+{
+    QString nextId = m_modelAudio->getNextIdTrack(id);
+    urlTrack(nextId);
+    emit nextIdTrackChanged(nextId);
+}
+
+void VkAudio::setPrevTrack(const QString& id)
+{
+    QString prevId = m_modelAudio->getPrevIdTrack(id);
+    urlTrack(prevId);
+    emit prevIdTrackChanged(prevId);
 }

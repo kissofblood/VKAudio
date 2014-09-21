@@ -36,10 +36,15 @@ signals:
     void progressDownloadValue(int value = 0);
     void mediaPositionChanged(qint64 position, const QString& duration);
     void mediaDurationChanged(qint64 duration);
+    void nextIdTrackChanged(const QString& id);
+    void prevIdTrackChanged(const QString& id);
 
 private slots:
     void checkUrl(const QUrl& url);
     void urlTrack(const QString& id);
+    void setPositionPlayer(int position);
+    void setNextTrack(const QString& id);
+    void setPrevTrack(const QString& id);
 
 private:
     QWebView        *m_authorization        = new QWebView;

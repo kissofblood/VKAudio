@@ -2,6 +2,7 @@
 #define DATAOBJECT_H
 
 #include <QObject>
+#include <QString>
 
 class DataObject : public QObject
 {

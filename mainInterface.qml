@@ -8,18 +8,47 @@ Item {
     property int widthGroove: 500
     property bool isPlay: true
     signal selectIdTrack(string id)
+    signal positionTrackChange(int value)
+    signal volumeTrackChange(int value)
+    signal selectPlayTrack()
+    signal selectPauseTrack()
+    signal selectNextTrack(string id)
+    signal selectPrevTrack(string id)
 
     width: 800
     height: 1280
 
     Connections {
         target: connectVkAudio
-        onProgressDownloadValue: progressBar.value = value
+        onProgressDownloadValue: {
+            progressBar.value = value
+            if(value == 100)
+            {
+                var index = listView.currentIndex
+                nameTrack.text = vkAudioModel[index].artist + " - " + vkAudioModel[index].title
+            }
+        }
         onMediaPositionChanged: {
             positionTrack.value = position
             durationTrack.text = duration
         }
         onMediaDurationChanged: positionTrack.maximumValue = duration
+        onNextIdTrackChanged: {
+            for(var i = 0; i < vkAudioModel.length; i++)
+                if(vkAudioModel[i].idTrack === id)
+                {
+                    listView.currentIndex = i
+                    break
+                }
+        }
+        onPrevIdTrackChanged: {
+            for(var i = vkAudioModel.length - 1; i >= 0; i--)
+                if(vkAudioModel[i].idTrack === id)
+                {
+                    listView.currentIndex = i
+                    break
+                }
+        }
     }
 
     Rectangle {
@@ -69,6 +98,7 @@ Item {
                 MouseArea {
                     id: clickedPrev
                     anchors.fill: prevTrack
+                    onReleased: item.selectPrevTrack(vkAudioModel[listView.currentIndex].idTrack)
                 }
             }
 
@@ -98,11 +128,13 @@ Item {
                         {
                             imagePlayOrPause.source = "qrc:/icon/icon/player_pause.png"
                             isPlay = false
+                            item.selectPauseTrack()
                         }
                         else
                         {
                             imagePlayOrPause.source = "qrc:/icon/icon/player_play.png"
                             isPlay = true
+                            item.selectPlayTrack()
                         }
                     }
                 }
@@ -128,6 +160,7 @@ Item {
                 MouseArea {
                     id: clickedNext
                     anchors.fill: nextTrack
+                    onReleased: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
                 }
             }
 
@@ -184,7 +217,6 @@ Item {
                         color: "white"
                         text: "0:0"
                     }
-
                 }
 
                 Slider {
@@ -193,6 +225,7 @@ Item {
                     Layout.fillWidth: true
                     style: styleSlider
                     value: 0
+                    onPressedChanged: item.positionTrackChange(value)
                 }
             }
 
@@ -266,7 +299,10 @@ Item {
                     widthGroove = 50
                     return styleSlider
                 }
-                value: 0
+                minimumValue: 0
+                maximumValue: 100
+                value: 100
+                onPressedChanged: item.volumeTrackChange(value)
             }
 
             Rectangle {
@@ -396,9 +432,7 @@ Item {
                     anchors.fill: parent
                     onClicked: {
                         listView.currentIndex = model.index
-                        var index = listView.currentIndex
-                        nameTrack.text = vkAudioModel[index].artist + " - " + vkAudioModel[index].title
-                        item.selectIdTrack(vkAudioModel[index].idTrack)
+                        item.selectIdTrack(vkAudioModel[listView.currentIndex].idTrack)
                     }
                 }
 

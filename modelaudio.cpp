@@ -178,6 +178,25 @@ QString ModelAudio::getNextIdTrack(const QString& id)
     return QString();
 }
 
+QString ModelAudio::getPrevIdTrack(const QString& id)
+{
+    auto iter = m_hashInfoTrack_[id];
+    if(iter == m_vecInfoTrack_.begin())
+    {
+        if(iter->first != true)
+            return m_hashInfoTrack_.key(m_vecInfoTrack_.end() - 1);
+        return QString();
+    }
+    auto iterBegin = iter;
+    for(iter = iter - 1; iter >= m_vecInfoTrack_.begin(); iter--)
+        if(iter->first != true)
+            return m_hashInfoTrack_.key(iter);
+    for(auto i = m_vecInfoTrack_.end() - 1; i >= iterBegin; i--)
+        if(iter->first != true)
+            return m_hashInfoTrack_.key(i);
+    return QString();
+}
+
 QString ModelAudio::getRandomIdTrack(const QString& id)
 {
     if(m_vecInfoTrack_.size() == 1)
@@ -190,7 +209,6 @@ QString ModelAudio::getRandomIdTrack(const QString& id)
         if(idRandom != id)
             if(m_vecInfoTrack_[currentIndex].first != true)
                 return idRandom;
-
     }
     return QString();
 }

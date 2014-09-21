@@ -31,6 +31,7 @@ public:
     ~ModelAudio() override;
     QUrl findUrlTrack(const QString& id);
     QString getNextIdTrack(const QString& id);
+    QString getPrevIdTrack(const QString& id);
     QString getRandomIdTrack(const QString& id);
     void setHideTrack(const QString& id, bool value);
     void findPlaylist(const QString& token);

@@ -7,8 +7,9 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     VkAudio vk;
-    vk.resize(800, 600);
     vk.show();
+
+    vk.resize(800, 400);
 
     return a.exec();
 }
