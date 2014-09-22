@@ -44,6 +44,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectPrevTrack(QString)),   SLOT(setPrevTrack(QString)));
     this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
     this->connect(item, SIGNAL(selectRandomTrack(bool, QString)), SLOT(setRandomTrack(bool, QString)));
+    this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
 }
 
 VkAudio::~VkAudio()
@@ -153,4 +154,15 @@ void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
          else
              emit nextTrackDefault();
      }
+}
+
+void VkAudio::downloadTrack(const QString& name)
+{
+    if(!m_bufferTrack->isOpen())
+        return;
+    QString pathFile = QFileDialog::getSaveFileName(this, "Save File", name, ".mp3");
+    QFile fileSave(pathFile + ".mp3");
+    if(fileSave.open(QIODevice::WriteOnly))
+        fileSave.write(m_bufferTrack->buffer());
+    fileSave.close();
 }

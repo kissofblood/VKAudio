@@ -20,6 +20,7 @@ Item {
     signal selectPrevTrack(string id)
     signal selectLoopTrack(bool value)
     signal selectRandomTrack(bool value, string id)
+    signal clickedDownloadTrack(string name)
 
     width: 800
     height: 1280
@@ -397,6 +398,8 @@ Item {
                 MouseArea {
                     id: clickedDonwload
                     anchors.fill: downloadTrack
+                    onReleased: item.clickedDownloadTrack(nameTrack.text)
+
                 }
             }
         }

@@ -5,22 +5,35 @@
 #include "observer.h"
 #include "modelaudio.h"
 #include <QWidget>
-#include <QtQuick/QQuickView>
-#include <QtQuick/QQuickItem>
-#include <QtWebKitWidgets/QWebView>
-#include <QtQml/QQmlContext>
+#include <QVector>
+#include <QString>
+#include <QBuffer>
+#include <QList>
+#include <QObject>
+#include <QPair>
 #include <QUrl>
 #include <QUrlQuery>
-#include <QString>
+#include <QHBoxLayout>
 #include <QTime>
+#include <QIcon>
+#include <QTimer>
+#include <QFileDialog>
+#include <QFile>
+#include <QIODevice>
 #include <QVariant>
-#include <QList>
-
+#include <tuple>
+#include <algorithm>
+#include <functional>
+#include <QtWebKitWidgets/QWebView>
+#include <QtQuick/QQuickView>
+#include <QtQuick/QQuickItem>
+#include <QtQml/QQmlContext>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QtNetwork/QNetworkRequest>
+#include <QtMultimedia/QMediaPlayer>
 
 #include <QtWidgets>
-
-#include <QtMultimedia>
-
 
 class VkAudio : public QWidget, public Observer::AbstractObserver
 {
@@ -48,6 +61,7 @@ private slots:
     void setLoopTrack(bool value);
     void setRandomTrack(bool value, const QString& id);
     void mediaStatus(QMediaPlayer::MediaStatus status);
+    void downloadTrack(const QString& name);
 
 private:
     QWebView        *m_authorization        = new QWebView;
@@ -57,7 +71,7 @@ private:
     QBuffer         *m_bufferTrack          = new QBuffer(this);
     QMediaPlayer    *m_player               = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     QNetworkAccessManager   *m_loadTrack    = nullptr;
-    QList<QObject*> m_propertyModelAudio_;
+    QList<QObject*>         m_propertyModelAudio_;
     QPair<bool, QString> m_isRandomTrack = qMakePair(false, QString());
     bool m_isLoopTrack   = false;
 };
