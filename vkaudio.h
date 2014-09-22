@@ -59,7 +59,7 @@ private slots:
     void setNextTrack(const QString& id);
     void setPrevTrack(const QString& id);
     void setLoopTrack(bool value);
-    void setRandomTrack(bool value, const QString& id);
+    void setRandomTrack(bool value);
     void mediaStatus(QMediaPlayer::MediaStatus status);
     void downloadTrack(const QString& name);
     void filterTrack(const QString& text);
@@ -73,7 +73,7 @@ private:
     QMediaPlayer    *m_player               = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     QNetworkAccessManager       *m_loadTrack = nullptr;
     QList<QObject*>  m_propertyModelAudio_;
-    QPair<bool, QString> m_isRandomTrack = qMakePair(false, QString());
+    bool m_isRandomTrack = false;
     bool m_isLoopTrack   = false;
 };
 

@@ -19,7 +19,7 @@ Item {
     signal selectNextTrack(string id)
     signal selectPrevTrack(string id)
     signal selectLoopTrack(bool value)
-    signal selectRandomTrack(bool value, string id)
+    signal selectRandomTrack(bool value)
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
 
@@ -61,8 +61,8 @@ Item {
                 }
         }
         onNextTrackDefault: {
-            var index = listView.currentIndex + 1;
-            if(index === vkAudioModel.length)
+            var index = listView.currentIndex;
+            if(index  + 1 === vkAudioModel.length)
             {
                 index = 0
                 listView.currentIndex = 0;
@@ -180,7 +180,7 @@ Item {
                 MouseArea {
                     id: clickedNext
                     anchors.fill: nextTrack
-                    onReleased: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
+                    onReleased: item.selectNextTrack(vkAudioModel[0].idTrack)
                 }
             }
 
@@ -281,7 +281,7 @@ Item {
                             randowTrack.color = "transparent"
                             isLoop = true
                             isRandom = false
-                            item.selectRandomTrack(isRandom, vkAudioModel[listView.currentIndex].idTrack)
+                            item.selectRandomTrack(isRandom)
                         }
                         item.selectLoopTrack(isLoop)
                     }
@@ -541,4 +541,3 @@ Item {
         }
     }
 }
-

@@ -43,7 +43,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectNextTrack(QString)),   SLOT(setNextTrack(QString)));
     this->connect(item, SIGNAL(selectPrevTrack(QString)),   SLOT(setPrevTrack(QString)));
     this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
-    this->connect(item, SIGNAL(selectRandomTrack(bool, QString)), SLOT(setRandomTrack(bool, QString)));
+    this->connect(item, SIGNAL(selectRandomTrack(bool)), SLOT(setRandomTrack(bool)));
     this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
     this->connect(item,  SIGNAL(returnPressedSearch(QString)),     SLOT(filterTrack(QString)));
 }
@@ -137,8 +137,8 @@ void VkAudio::setPrevTrack(const QString& id)
 void VkAudio::setLoopTrack(bool value)
 { m_isLoopTrack = value; }
 
-void VkAudio::setRandomTrack(bool value, const QString& id)
-{ m_isRandomTrack = qMakePair(value, id); }
+void VkAudio::setRandomTrack(bool value)
+{ m_isRandomTrack = value; }
 
 void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
 {
@@ -146,9 +146,9 @@ void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
      {
          if(m_isLoopTrack)
              m_player->play();
-         else if(m_isRandomTrack.first)
+         else if(m_isRandomTrack)
          {
-            QString randId = m_modelAudio->getRandomIdTrack(m_isRandomTrack.second);
+            QString randId = m_modelAudio->getRandomIdTrack();
             urlTrack(randId);
             emit idTrackChanged(true, randId);
          }

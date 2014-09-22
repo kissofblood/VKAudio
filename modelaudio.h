@@ -38,7 +38,7 @@ public:
     QUrl findUrlTrack(const QString& id);
     QString getNextIdTrack(const QString& id);
     QString getPrevIdTrack(const QString& id);
-    QString getRandomIdTrack(const QString& id);
+    QString getRandomIdTrack();
     void setHideTrack(const QString& id, bool value);
     void findPlaylist(const QString& token);
     void globalSearchAudio(const QString& artist);
@@ -46,6 +46,12 @@ public:
     void removeObserver(Observer::AbstractObserver* observer) override;
     void notifyAudioObservers() override;
     void notifyFriendObservers() override;
+
+    QString getName(const QString& id)
+    {
+        return std::get<0>(m_hashInfoTrack_[id]->second) + " - "
+                + std::get<1>(m_hashInfoTrack_[id]->second);
+    }
 
 signals:
     void loadTrue();

@@ -164,9 +164,9 @@ QString ModelAudio::getNextIdTrack(const QString& id)
     auto iter = m_hashInfoTrack_[id];
     if(iter + 1 == m_vecInfoTrack_.end())
     {
-        if(iter->first != true)
-            return m_hashInfoTrack_.key(m_vecInfoTrack_.begin());
-        return QString();
+        for(auto i = m_vecInfoTrack_.begin(); i != m_vecInfoTrack_.end(); i++)
+            if(i->first != true)
+                return m_hashInfoTrack_.key(i);
     }
     auto iterEnd = iter;
     for(iter = iter + 1; iter != m_vecInfoTrack_.end(); iter++)
@@ -175,7 +175,7 @@ QString ModelAudio::getNextIdTrack(const QString& id)
     for(auto i = m_vecInfoTrack_.begin(); i != iterEnd; i++)
         if(i->first != true)
             return m_hashInfoTrack_.key(i);
-    return QString();
+    return id;
 }
 
 QString ModelAudio::getPrevIdTrack(const QString& id)
@@ -183,21 +183,21 @@ QString ModelAudio::getPrevIdTrack(const QString& id)
     auto iter = m_hashInfoTrack_[id];
     if(iter == m_vecInfoTrack_.begin())
     {
-        if(iter->first != true)
-            return m_hashInfoTrack_.key(m_vecInfoTrack_.end() - 1);
-        return QString();
+        for(auto i = m_vecInfoTrack_.end() - 1; i >= m_vecInfoTrack_.begin(); i--)
+            if(i->first != true)
+                return m_hashInfoTrack_.key(i);
     }
     auto iterBegin = iter;
     for(iter = iter - 1; iter >= m_vecInfoTrack_.begin(); iter--)
         if(iter->first != true)
             return m_hashInfoTrack_.key(iter);
     for(auto i = m_vecInfoTrack_.end() - 1; i >= iterBegin; i--)
-        if(iter->first != true)
+        if(i->first != true)
             return m_hashInfoTrack_.key(i);
-    return QString();
+    return id;
 }
 
-QString ModelAudio::getRandomIdTrack(const QString& id)
+QString ModelAudio::getRandomIdTrack()
 {
     if(m_vecInfoTrack_.size() == 1)
         return m_hashInfoTrack_.key(m_vecInfoTrack_.begin());
@@ -206,8 +206,7 @@ QString ModelAudio::getRandomIdTrack(const QString& id)
     {
         int currentIndex = qrand() % m_vecInfoTrack_.size();
         QString idRandom = m_hashInfoTrack_.key(m_vecInfoTrack_.begin() + currentIndex);
-        if(idRandom != id)
-            if(m_vecInfoTrack_[currentIndex].first != true)
+        if(m_vecInfoTrack_[currentIndex].first != true)
                 return idRandom;
     }
     return QString();
