@@ -45,6 +45,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
     this->connect(item, SIGNAL(selectRandomTrack(bool, QString)), SLOT(setRandomTrack(bool, QString)));
     this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
+    this->connect(item,  SIGNAL(returnPressedSearch(QString)),     SLOT(filterTrack(QString)));
 }
 
 VkAudio::~VkAudio()
@@ -76,7 +77,7 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
         std::tie(id, artist, title, duration) = track;
         int durationMsec = duration * 1000;
         QTime durationTime(0, (durationMsec / 60000) % 60, (durationMsec / 1000) % 60);
-        m_propertyModelAudio_.push_back(new DataObject(artist, title, durationTime.toString("mm:ss"), id, this));
+        m_propertyModelAudio_.push_back(new PropertyModelAudio(artist, title, durationTime.toString("mm:ss"), id, this));
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkAudioModel", QVariant::fromValue(m_propertyModelAudio_));
@@ -165,4 +166,23 @@ void VkAudio::downloadTrack(const QString& name)
     if(fileSave.open(QIODevice::WriteOnly))
         fileSave.write(m_bufferTrack->buffer());
     fileSave.close();
+}
+
+void VkAudio::filterTrack(const QString& text)
+{
+    QList<QObject*> result;
+    for(QObject* objectModel : m_propertyModelAudio_)
+    {
+        PropertyModelAudio* propertyModel = qobject_cast<PropertyModelAudio*>(objectModel);
+        if(propertyModel->artist().contains(text, Qt::CaseInsensitive)
+           || propertyModel->title().contains(text, Qt::CaseInsensitive))
+        {
+            m_modelAudio->setHideTrack(propertyModel->idTrack(), false);
+            result.push_back(propertyModel);
+        }
+        else
+            m_modelAudio->setHideTrack(propertyModel->idTrack(), true);
+    }
+    QQmlContext* context = m_quickView->rootContext();
+    context->setContextProperty("vkAudioModel", QVariant::fromValue(result));
 }

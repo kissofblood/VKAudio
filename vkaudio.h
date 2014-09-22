@@ -1,7 +1,7 @@
 #ifndef VKAUDIO_H
 #define VKAUDIO_H
 
-#include "dataobject.h"
+#include "propertymodelaudio.h"
 #include "observer.h"
 #include "modelaudio.h"
 #include <QWidget>
@@ -62,6 +62,7 @@ private slots:
     void setRandomTrack(bool value, const QString& id);
     void mediaStatus(QMediaPlayer::MediaStatus status);
     void downloadTrack(const QString& name);
+    void filterTrack(const QString& text);
 
 private:
     QWebView        *m_authorization        = new QWebView;
@@ -70,8 +71,8 @@ private:
     ModelAudio      *m_modelAudio           = new ModelAudio(this);
     QBuffer         *m_bufferTrack          = new QBuffer(this);
     QMediaPlayer    *m_player               = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
-    QNetworkAccessManager   *m_loadTrack    = nullptr;
-    QList<QObject*>         m_propertyModelAudio_;
+    QNetworkAccessManager       *m_loadTrack = nullptr;
+    QList<QObject*>  m_propertyModelAudio_;
     QPair<bool, QString> m_isRandomTrack = qMakePair(false, QString());
     bool m_isLoopTrack   = false;
 };

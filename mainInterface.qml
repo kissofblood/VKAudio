@@ -21,6 +21,7 @@ Item {
     signal selectLoopTrack(bool value)
     signal selectRandomTrack(bool value, string id)
     signal clickedDownloadTrack(string name)
+    signal returnPressedSearch(string search)
 
     width: 800
     height: 1280
@@ -412,6 +413,7 @@ Item {
         height: 40
         font.pixelSize: 25
         placeholderText: "search"
+        onEditingFinished: item.returnPressedSearch(text)
         style: TextFieldStyle {
             textColor: "white"
             placeholderTextColor: "lightblue"
