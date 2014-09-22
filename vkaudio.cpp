@@ -25,6 +25,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 
     this->connect(m_modelAudio, &ModelAudio::loadTrue, m_modelAudio, &ModelAudio::getPlaylistMy);
     this->connect(m_authorization, &QWebView::urlChanged, this, &VkAudio::checkUrl);
+    this->connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &VkAudio::mediaStatus);
     this->connect(m_player, &QMediaPlayer::positionChanged, this, [this](quint64 position)
     {
         QTime displayTime(0, (position / 60000) % 60, (position / 1000) % 60);
@@ -32,13 +33,17 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     });
     this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](quint64 duration)
     { emit mediaDurationChanged(duration / 1000); });
-    this->connect(m_quickView->rootObject(), SIGNAL(selectIdTrack(QString)),    SLOT(urlTrack(QString)));
-    this->connect(m_quickView->rootObject(), SIGNAL(positionTrackChange(int)),  SLOT(setPositionPlayer(int)));
-    this->connect(m_quickView->rootObject(), SIGNAL(selectPlayTrack()),         m_player, SLOT(play()));
-    this->connect(m_quickView->rootObject(), SIGNAL(selectPauseTrack()),        m_player, SLOT(pause()));
-    this->connect(m_quickView->rootObject(), SIGNAL(volumeTrackChange(int)),    m_player, SLOT(setVolume(int)));
-    this->connect(m_quickView->rootObject(), SIGNAL(selectNextTrack(QString)), SLOT(setNextTrack(QString)));
-    this->connect(m_quickView->rootObject(), SIGNAL(selectPrevTrack(QString)), SLOT(setPrevTrack(QString)));
+
+    QQuickItem* item = m_quickView->rootObject();
+    this->connect(item, SIGNAL(selectIdTrack(QString)),     SLOT(urlTrack(QString)));
+    this->connect(item, SIGNAL(positionTrackChange(int)),   SLOT(setPositionPlayer(int)));
+    this->connect(item, SIGNAL(selectPlayTrack()),          m_player, SLOT(play()));
+    this->connect(item, SIGNAL(selectPauseTrack()),         m_player, SLOT(pause()));
+    this->connect(item, SIGNAL(volumeTrackChange(int)),     m_player, SLOT(setVolume(int)));
+    this->connect(item, SIGNAL(selectNextTrack(QString)),   SLOT(setNextTrack(QString)));
+    this->connect(item, SIGNAL(selectPrevTrack(QString)),   SLOT(setPrevTrack(QString)));
+    this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
+    this->connect(item, SIGNAL(selectRandomTrack(bool, QString)), SLOT(setRandomTrack(bool, QString)));
 }
 
 VkAudio::~VkAudio()
@@ -59,8 +64,8 @@ void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>
 
 void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack)
 {
-    std::for_each(m_dataList_.begin(), m_dataList_.end(), std::bind(&QObject::deleteLater, std::placeholders::_1));
-    m_dataList_.clear();
+    std::for_each(m_propertyModelAudio_.begin(), m_propertyModelAudio_.end(), std::bind(&QObject::deleteLater, std::placeholders::_1));
+    m_propertyModelAudio_.clear();
     for(auto& track : infoTrack)
     {
         QString id;
@@ -70,10 +75,10 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
         std::tie(id, artist, title, duration) = track;
         int durationMsec = duration * 1000;
         QTime durationTime(0, (durationMsec / 60000) % 60, (durationMsec / 1000) % 60);
-        m_dataList_.push_back(new DataObject(artist, title, durationTime.toString("mm:ss"), id, this));
+        m_propertyModelAudio_.push_back(new DataObject(artist, title, durationTime.toString("mm:ss"), id, this));
     }
     QQmlContext* context = m_quickView->rootContext();
-    context->setContextProperty("vkAudioModel", QVariant::fromValue(m_dataList_));
+    context->setContextProperty("vkAudioModel", QVariant::fromValue(m_propertyModelAudio_));
 }
 
 void VkAudio::checkUrl(const QUrl& url)
@@ -89,8 +94,7 @@ void VkAudio::checkUrl(const QUrl& url)
 
 void VkAudio::urlTrack(const QString& id)
 {
-    delete m_loadTrack;
-    m_loadTrack = nullptr;
+    m_loadTrack->deleteLater();
     m_loadTrack = new QNetworkAccessManager(this);
     QNetworkReply* reply = m_loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
 
@@ -118,12 +122,35 @@ void VkAudio::setNextTrack(const QString& id)
 {
     QString nextId = m_modelAudio->getNextIdTrack(id);
     urlTrack(nextId);
-    emit nextIdTrackChanged(nextId);
+    emit idTrackChanged(true, nextId);
 }
 
 void VkAudio::setPrevTrack(const QString& id)
 {
     QString prevId = m_modelAudio->getPrevIdTrack(id);
     urlTrack(prevId);
-    emit prevIdTrackChanged(prevId);
+    emit idTrackChanged(false, prevId);
+}
+
+void VkAudio::setLoopTrack(bool value)
+{ m_isLoopTrack = value; }
+
+void VkAudio::setRandomTrack(bool value, const QString& id)
+{ m_isRandomTrack = qMakePair(value, id); }
+
+void VkAudio::mediaStatus(QMediaPlayer::MediaStatus status)
+{
+     if(status == QMediaPlayer::EndOfMedia)
+     {
+         if(m_isLoopTrack)
+             m_player->play();
+         else if(m_isRandomTrack.first)
+         {
+            QString randId = m_modelAudio->getRandomIdTrack(m_isRandomTrack.second);
+            urlTrack(randId);
+            emit idTrackChanged(true, randId);
+         }
+         else
+             emit nextTrackDefault();
+     }
 }

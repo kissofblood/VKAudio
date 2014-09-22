@@ -36,8 +36,8 @@ signals:
     void progressDownloadValue(int value = 0);
     void mediaPositionChanged(qint64 position, const QString& duration);
     void mediaDurationChanged(qint64 duration);
-    void nextIdTrackChanged(const QString& id);
-    void prevIdTrackChanged(const QString& id);
+    void idTrackChanged(bool value, const QString& id);
+    void nextTrackDefault();
 
 private slots:
     void checkUrl(const QUrl& url);
@@ -45,6 +45,9 @@ private slots:
     void setPositionPlayer(int position);
     void setNextTrack(const QString& id);
     void setPrevTrack(const QString& id);
+    void setLoopTrack(bool value);
+    void setRandomTrack(bool value, const QString& id);
+    void mediaStatus(QMediaPlayer::MediaStatus status);
 
 private:
     QWebView        *m_authorization        = new QWebView;
@@ -54,8 +57,9 @@ private:
     QBuffer         *m_bufferTrack          = new QBuffer(this);
     QMediaPlayer    *m_player               = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     QNetworkAccessManager   *m_loadTrack    = nullptr;
-
-    QList<QObject*> m_dataList_;
+    QList<QObject*> m_propertyModelAudio_;
+    QPair<bool, QString> m_isRandomTrack = qMakePair(false, QString());
+    bool m_isLoopTrack   = false;
 };
 
 #endif // VKAUDIO_H

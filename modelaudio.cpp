@@ -61,7 +61,7 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
 
     QUrlQuery queryUserMy("https://api.vk.com/method/users.get.xml");
     queryUserMy.addQueryItem("v", "5.24");
-    queryUserMy.addQueryItem("fields", "photo_50");
+    queryUserMy.addQueryItem("fields", "photo_100");
     queryUserMy.addQueryItem("access_token", m_token);
     QString resultMy = queryUserMy.toString();
     for(int i = 0; i < resultMy.length(); i++)

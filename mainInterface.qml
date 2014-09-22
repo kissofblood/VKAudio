@@ -5,8 +5,12 @@ import QtQuick.Controls.Styles 1.2
 
 Item {
     id: item
+
     property int widthGroove: 500
     property bool isPlay: true
+    property bool isLoop: false
+    property bool isRandom: false
+
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
     signal volumeTrackChange(int value)
@@ -14,6 +18,8 @@ Item {
     signal selectPauseTrack()
     signal selectNextTrack(string id)
     signal selectPrevTrack(string id)
+    signal selectLoopTrack(bool value)
+    signal selectRandomTrack(bool value, string id)
 
     width: 800
     height: 1280
@@ -26,6 +32,8 @@ Item {
             {
                 var index = listView.currentIndex
                 nameTrack.text = vkAudioModel[index].artist + " - " + vkAudioModel[index].title
+                imagePlayOrPause.source = "qrc:/icon/icon/player_play.png"
+                isPlay = true
             }
         }
         onMediaPositionChanged: {
@@ -33,21 +41,31 @@ Item {
             durationTrack.text = duration
         }
         onMediaDurationChanged: positionTrack.maximumValue = duration
-        onNextIdTrackChanged: {
-            for(var i = 0; i < vkAudioModel.length; i++)
-                if(vkAudioModel[i].idTrack === id)
+        onIdTrackChanged: {
+            if(value == true)
+            {
+                for(var next = 0; next < vkAudioModel.length; next++)
+                    if(vkAudioModel[next].idTrack === id)
+                    {
+                        listView.currentIndex = next
+                        break
+                    }
+            }
+            else for(var prev = vkAudioModel.length - 1; prev >= 0; prev--)
+                if(vkAudioModel[prev].idTrack === id)
                 {
-                    listView.currentIndex = i
+                    listView.currentIndex = prev
                     break
                 }
         }
-        onPrevIdTrackChanged: {
-            for(var i = vkAudioModel.length - 1; i >= 0; i--)
-                if(vkAudioModel[i].idTrack === id)
-                {
-                    listView.currentIndex = i
-                    break
-                }
+        onNextTrackDefault: {
+            var index = listView.currentIndex + 1;
+            if(index === vkAudioModel.length)
+            {
+                index = 0
+                listView.currentIndex = 0;
+            }
+            item.selectNextTrack(vkAudioModel[index].idTrack)
         }
     }
 
@@ -237,7 +255,7 @@ Item {
                 Layout.minimumHeight: 60
                 Layout.maximumWidth: 50
                 Layout.maximumHeight: 60
-                color: clickedLoop.pressed ? "#222" : "transparent"
+                color: "transparent"
                 antialiasing: true
                 radius: 5
 
@@ -249,8 +267,23 @@ Item {
                 MouseArea {
                     id: clickedLoop
                     anchors.fill: loopTrack
+                    onReleased: {
+                        if(isLoop)
+                        {
+                            loopTrack.color = "transparent"
+                            isLoop = false
+                        }
+                        else
+                        {
+                            loopTrack.color = "#222"
+                            randowTrack.color = "transparent"
+                            isLoop = true
+                            isRandom = false
+                            item.selectRandomTrack(isRandom, vkAudioModel[listView.currentIndex].idTrack)
+                        }
+                        item.selectLoopTrack(isLoop)
+                    }
                 }
-
             }
 
             Rectangle {
@@ -261,7 +294,7 @@ Item {
                 Layout.minimumHeight: 60
                 Layout.maximumWidth: 50
                 Layout.maximumHeight: 60
-                color: clickedRandow.pressed ? "#222" : "transparent"
+                color: "transparent"
                 antialiasing: true
                 radius: 5
 
@@ -273,6 +306,22 @@ Item {
                 MouseArea {
                     id: clickedRandow
                     anchors.fill: randowTrack
+                    onReleased: {
+                        if(isRandom)
+                        {
+                            randowTrack.color = "transparent"
+                            isRandom = false
+                        }
+                        else
+                        {
+                            randowTrack.color = "#222"
+                            loopTrack.color = "transparent"
+                            isRandom = true
+                            isLoop = false
+                            item.selectLoopTrack(isLoop)
+                        }
+                        item.selectRandomTrack(isRandom, vkAudioModel[listView.currentIndex].idTrack)
+                    }
                 }
             }
 

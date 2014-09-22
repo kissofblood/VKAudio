@@ -3,23 +3,29 @@
 
 #include "observer.h"
 #include <QObject>
-#include <QVector>
-#include <QString>
+#include <QPair>
 #include <QUrlQuery>
 #include <QUrl>
-#include <functional>
-#include <algorithm>
-#include <tuple>
+#include <QString>
+#include <QVector>
+#include <QHash>
+#include <QByteArray>
+#include <QIcon>
+#include <QEventLoop>
+#include <QPixmap>
+#include <QStringList>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 #include <QtXml/QDomDocument>
 #include <QtXml/QDomNode>
 #include <QtXml/QDomElement>
+#include <tuple>
+#include <functional>
+#include <algorithm>
+
 
 #include <QtWidgets>
-#include <QtNetwork>
-#include <QtXml>
 
 class ModelAudio : public QObject, public Observer::AbstractObservable
 {
