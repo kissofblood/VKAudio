@@ -162,16 +162,11 @@ QUrl ModelAudio::findUrlTrack(const QString& id)
 QString ModelAudio::getNextIdTrack(const QString& id)
 {
     auto iter = m_hashInfoTrack_[id];
-    if(iter + 1 == m_vecInfoTrack_.end())
-    {
-        for(auto i = m_vecInfoTrack_.begin(); i != m_vecInfoTrack_.end(); i++)
-            if(i->first != true)
-                return m_hashInfoTrack_.key(i);
-    }
     auto iterEnd = iter;
-    for(iter = iter + 1; iter != m_vecInfoTrack_.end(); iter++)
-        if(iter->first != true)
-            return m_hashInfoTrack_.key(iter);
+    for(auto i = iter + 1; i != m_vecInfoTrack_.end(); i++)
+        if(i->first != true)
+            return m_hashInfoTrack_.key(i);
+
     for(auto i = m_vecInfoTrack_.begin(); i != iterEnd; i++)
         if(i->first != true)
             return m_hashInfoTrack_.key(i);
@@ -181,16 +176,11 @@ QString ModelAudio::getNextIdTrack(const QString& id)
 QString ModelAudio::getPrevIdTrack(const QString& id)
 {
     auto iter = m_hashInfoTrack_[id];
-    if(iter == m_vecInfoTrack_.begin())
-    {
-        for(auto i = m_vecInfoTrack_.end() - 1; i >= m_vecInfoTrack_.begin(); i--)
-            if(i->first != true)
-                return m_hashInfoTrack_.key(i);
-    }
     auto iterBegin = iter;
-    for(iter = iter - 1; iter >= m_vecInfoTrack_.begin(); iter--)
-        if(iter->first != true)
-            return m_hashInfoTrack_.key(iter);
+    for(auto i = iter - 1; i >= m_vecInfoTrack_.begin(); i--)
+        if(i->first != true)
+            return m_hashInfoTrack_.key(i);
+
     for(auto i = m_vecInfoTrack_.end() - 1; i >= iterBegin; i--)
         if(i->first != true)
             return m_hashInfoTrack_.key(i);

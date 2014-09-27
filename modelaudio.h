@@ -47,12 +47,6 @@ public:
     void notifyAudioObservers() override;
     void notifyFriendObservers() override;
 
-    QString getName(const QString& id)
-    {
-        return std::get<0>(m_hashInfoTrack_[id]->second) + " - "
-                + std::get<1>(m_hashInfoTrack_[id]->second);
-    }
-
 signals:
     void loadTrue();
 

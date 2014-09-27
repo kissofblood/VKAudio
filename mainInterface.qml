@@ -60,15 +60,7 @@ Item {
                     break
                 }
         }
-        onNextTrackDefault: {
-            var index = listView.currentIndex;
-            if(index  + 1 === vkAudioModel.length)
-            {
-                index = 0
-                listView.currentIndex = 0;
-            }
-            item.selectNextTrack(vkAudioModel[index].idTrack)
-        }
+        onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
     }
 
     Rectangle {
@@ -180,7 +172,7 @@ Item {
                 MouseArea {
                     id: clickedNext
                     anchors.fill: nextTrack
-                    onReleased: item.selectNextTrack(vkAudioModel[0].idTrack)
+                    onReleased: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
                 }
             }
 
@@ -400,7 +392,6 @@ Item {
                     id: clickedDonwload
                     anchors.fill: downloadTrack
                     onReleased: item.clickedDownloadTrack(nameTrack.text)
-
                 }
             }
         }
