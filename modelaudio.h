@@ -10,7 +10,6 @@
 #include <QVector>
 #include <QHash>
 #include <QByteArray>
-#include <QIcon>
 #include <QEventLoop>
 #include <QPixmap>
 #include <QStringList>
@@ -35,6 +34,7 @@ class ModelAudio : public QObject, public Observer::AbstractObservable
 public:
     explicit ModelAudio(QObject* parent = nullptr);
     ~ModelAudio() override;
+
     QUrl findUrlTrack(const QString& id);
     QString getNextIdTrack(const QString& id);
     QString getPrevIdTrack(const QString& id);
@@ -68,12 +68,12 @@ private:
     QVector<Observer::AbstractObserver*>    m_observer_;
     QVector<InfoTrack>                              m_vecInfoTrack_;
     QHash<IdTrack, QVector<InfoTrack>::iterator>    m_hashInfoTrack_;
-    QHash<IdUser, QPair<QString, QIcon>> m_infoFriend_;
-    QPair<IdUser, QPair<QString, QIcon>> m_infoMy;
+    QHash<IdUser, QPair<QString, QPixmap>> m_infoFriend_;
+    QPair<IdUser, QPair<QString, QPixmap>> m_infoMy;
     QString m_token;
     int m_countFriend = 0;
 
-    QPair<IdUser, QPair<QString, QIcon>> getResultParserUser(const QByteArray& array);
+    QPair<IdUser, QPair<QString, QPixmap>> getResultParserUser(const QByteArray& array);
 };
 
 #endif // MODELAUDIO_H

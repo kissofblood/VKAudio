@@ -7,6 +7,8 @@ Item {
     id: item
 
     property int widthGroove: 500
+    property int sizePixNormal: 60
+    property int sizePixIncrease: 100
     property bool isPlay: true
     property bool isLoop: false
     property bool isRandom: false
@@ -86,9 +88,24 @@ Item {
 
         RowLayout {
             anchors.fill: player
-            anchors.leftMargin: 80
+            anchors.leftMargin: 40
             anchors.rightMargin: 30
             spacing: 6
+
+            Rectangle {
+                id: friend
+                width: 48
+                height: 48
+                color: clickedFriend.pressed ? "red" : "green"
+
+                MouseArea {
+                    id: clickedFriend
+                    anchors.fill: friend
+                    onClicked: {
+                        listFriend.visible = true
+                    }
+                }
+            }
 
             Rectangle {
                 id: prevTrack
@@ -528,6 +545,89 @@ Item {
                     height: parent.height
                     width: parent.width * control.value / control.maximumValue
                 }
+            }
+        }
+    }
+
+    Item {
+        id: listFriend
+        width: parent.width / 2
+        height: parent.height
+        visible: false
+
+        RowLayout {
+            id: rowLayout
+            spacing: 0
+            width: listFriend.width - 200
+            height: listFriend.height
+            visible: true
+
+            Rectangle {
+                id: exit
+                anchors.verticalCenter: listFriend.verticalCenter
+                Layout.fillWidth: true
+                Layout.minimumWidth: 50
+                Layout.minimumHeight: 30
+                Layout.maximumWidth: 100
+                Layout.maximumHeight: 30
+                antialiasing: true
+                radius: 5
+                color: "red"
+            }
+
+            TextField {
+                anchors.leftMargin: exit.anchors.rightMargin
+                anchors.verticalCenter: listFriend.verticalCenter
+                Layout.fillWidth: true
+                Layout.minimumWidth: 40
+                Layout.minimumHeight: 30
+                Layout.maximumWidth: 200
+                Layout.maximumHeight: 30
+            }
+
+            PathView {
+                id: pathView
+                anchors.fill: parent
+                model: vkFriendModel
+                pathItemCount: 20
+                path: Path {
+                    startX: 0
+                    startY: 0
+
+                    PathAttribute { name: "size"; value: sizePixNormal; }
+
+                    PathCurve {
+                        id: curve
+                        y: pathView.height / 2 - 100
+                        x: pathView.width / 2
+                    }
+
+                    PathAttribute { name: "size"; value: sizePixNormal; }
+                    PathPercent { value: 0.49; }
+                    PathLine { relativeX: 0; relativeY: 0; }
+                    PathAttribute { name: "size"; value: sizePixIncrease; }
+
+                    PathCurve {
+                        y: pathView.height / 2 + 100
+                        x: pathView.width / 2
+
+                    }
+
+                    PathAttribute { name: "size"; value: sizePixIncrease; }
+                    PathLine { relativeX: 0; relativeY: 0; }
+                    PathAttribute { name: "size"; value: sizePixNormal; }
+                    PathPercent { value: 0.51; }
+
+                    PathCurve {
+                        x: 0
+                        y:  pathView.height
+                    }
+                }
+                delegate: Image {
+                        source: "image://avatarFriend/" + idFriend
+                        width: PathView.size
+                        height: PathView.size
+                    }
             }
         }
     }

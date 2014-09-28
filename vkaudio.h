@@ -2,6 +2,8 @@
 #define VKAUDIO_H
 
 #include "propertymodelaudio.h"
+#include "propertymodelfriend.h"
+#include "avatarprovider.h"
 #include "observer.h"
 #include "modelaudio.h"
 #include <QWidget>
@@ -33,6 +35,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtMultimedia/QMediaPlayer>
 
+
 #include <QtWidgets>
 
 class VkAudio : public QWidget, public Observer::AbstractObserver
@@ -42,7 +45,7 @@ public:
     explicit VkAudio(QWidget* parent = nullptr);
     ~VkAudio() override;
 
-    void updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend) override;
+    void updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend) override;
     void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack) override;
 
 signals:
@@ -71,8 +74,10 @@ private:
     ModelAudio      *m_modelAudio           = new ModelAudio(this);
     QBuffer         *m_bufferTrack          = new QBuffer(this);
     QMediaPlayer    *m_player               = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
+    AvatarProvider  *m_avatar               = nullptr;
     QNetworkAccessManager       *m_loadTrack = nullptr;
-    QList<QObject*>  m_propertyModelAudio_;
+    QList<QObject*> m_propertyModelAudio_;
+    QList<QObject*> m_propertyModelFriend_;
     bool m_isRandomTrack = false;
     bool m_isLoopTrack   = false;
 };

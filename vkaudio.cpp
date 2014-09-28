@@ -49,19 +49,34 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 }
 
 VkAudio::~VkAudio()
-{ delete m_quickView; }
-
-void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QIcon>>& listFriend)
 {
+    delete m_quickView;
+    delete m_avatar;
+}
+
+void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend)
+{
+    std::for_each(m_propertyModelFriend_.begin(), m_propertyModelFriend_.end(), std::bind(&QObject::deleteLater, std::placeholders::_1));
+    m_propertyModelFriend_.clear();
+    delete m_avatar;
+    m_avatar = nullptr;
+
+    QHash<QString, QPixmap> avatart;
     for(auto& info : listFriend)
     {
         IdUser id;
         QString name;
-        QIcon icon;
-        std::tie(id, name, icon) = info;
-        //qDebug()<<id<<name;
-        //ui->cmbFriend->addItem(icon, name, QVariant(id));
+        QPixmap pix;
+        std::tie(id, name, pix) = info;
+        m_propertyModelFriend_.push_back(new PropertyModelFriend(name, id, this));
+        avatart.insert(id, pix);
     }
+
+    QQmlContext* context = m_quickView->rootContext();
+    context->setContextProperty("vkFriendModel", QVariant::fromValue(m_propertyModelFriend_));
+
+    m_avatar = new AvatarProvider(qMove(avatart));
+    m_quickView->engine()->addImageProvider("avatarFriend", m_avatar);
 }
 
 void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack)

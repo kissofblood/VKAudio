@@ -60,8 +60,8 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
     }
 
     QUrlQuery queryUserMy("https://api.vk.com/method/users.get.xml");
-    queryUserMy.addQueryItem("v", "5.24");
     queryUserMy.addQueryItem("fields", "photo_100");
+    queryUserMy.addQueryItem("v", "5.24");
     queryUserMy.addQueryItem("access_token", m_token);
     QString resultMy = queryUserMy.toString();
     for(int i = 0; i < resultMy.length(); i++)
@@ -70,6 +70,7 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
             resultMy.replace(i, 1, '?');
             break;
         }
+
     m_loadUser_.push_back(new QNetworkAccessManager);
     m_loadUser_.back()->get(QNetworkRequest(resultMy));
     this->connect(m_loadUser_.back(), &QNetworkAccessManager::finished, [this](QNetworkReply* reply)
@@ -114,7 +115,7 @@ void ModelAudio::parserUser(QNetworkReply* reply)
         notifyFriendObservers();
 }
 
-QPair<IdUser, QPair<QString, QIcon>> ModelAudio::getResultParserUser(const QByteArray& array)
+QPair<IdUser, QPair<QString, QPixmap>> ModelAudio::getResultParserUser(const QByteArray& array)
 {
     m_loadIcon_.push_back(new QNetworkAccessManager);
     QDomDocument doc;
@@ -145,7 +146,7 @@ QPair<IdUser, QPair<QString, QIcon>> ModelAudio::getResultParserUser(const QByte
     this->connect(m_loadIcon_.back(), &QNetworkAccessManager::finished, [&pix](QNetworkReply* reply)
     { pix.loadFromData(QByteArray(reply->readAll()), "jpg"); });
     loop.exec();
-    return qMakePair(id, qMakePair(name, QIcon(pix)));
+    return qMakePair(id, qMakePair(name, pix));
 }
 
 ModelAudio::~ModelAudio()
@@ -278,7 +279,7 @@ void ModelAudio::notifyAudioObservers()
 
 void ModelAudio::notifyFriendObservers()
 {
-    QVector<std::tuple<IdUser, QString, QIcon>> listFriend;
+    QVector<std::tuple<IdUser, QString, QPixmap>> listFriend;
     for(auto iter = m_infoFriend_.begin(); iter != m_infoFriend_.end(); iter++)
         listFriend.push_back(std::make_tuple(iter.key(), iter.value().first, iter.value().second));
     std::for_each(m_observer_.begin(), m_observer_.end(), std::bind(&Observer::AbstractObserver::updateListFriend, std::placeholders::_1, listFriend));
