@@ -45,8 +45,8 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
 
 void ModelAudio::parserFriend(QNetworkReply* reply)
 {
-    std::for_each(m_loadIcon_.begin(), m_loadIcon_.end(), std::bind(&QNetworkAccessManager::deleteLater, std::placeholders::_1));
-    m_loadIcon_.clear();
+    std::for_each(m_loadAvatar_.begin(), m_loadAvatar_.end(), std::bind(&QNetworkAccessManager::deleteLater, std::placeholders::_1));
+    m_loadAvatar_.clear();
     m_countFriend = 0;
     QStringList idFriend;
     QStringList resutlFriend;
@@ -71,7 +71,7 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
             break;
         }
 
-    m_loadUser_.push_back(new QNetworkAccessManager);
+    m_loadUser_.push_back(new QNetworkAccessManager(this));
     m_loadUser_.back()->get(QNetworkRequest(resultMy));
     this->connect(m_loadUser_.back(), &QNetworkAccessManager::finished, [this](QNetworkReply* reply)
     {
@@ -100,7 +100,7 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
     m_countFriend = resutlFriend.size();
     for(QString& url : resutlFriend)
     {
-        m_loadUser_.push_back(new QNetworkAccessManager);
+        m_loadUser_.push_back(new QNetworkAccessManager(this));
         m_loadUser_.back()->get(QNetworkRequest(url));
         this->connect(m_loadUser_.back(), &QNetworkAccessManager::finished, this, &ModelAudio::parserUser);
     }
@@ -117,7 +117,7 @@ void ModelAudio::parserUser(QNetworkReply* reply)
 
 QPair<IdUser, QPair<QString, QPixmap>> ModelAudio::getResultParserUser(const QByteArray& array)
 {
-    m_loadIcon_.push_back(new QNetworkAccessManager);
+    m_loadAvatar_.push_back(new QNetworkAccessManager(this));
     QDomDocument doc;
     doc.setContent(array);
     QDomNode nodeUser = doc.documentElement().firstChild().toElement().firstChild();
@@ -140,21 +140,13 @@ QPair<IdUser, QPair<QString, QPixmap>> ModelAudio::getResultParserUser(const QBy
 
     QEventLoop loop;
     QPixmap pix;
-    m_loadIcon_.back()->get(QNetworkRequest(photo));
+    m_loadAvatar_.back()->get(QNetworkRequest(photo));
 
-    this->connect(m_loadIcon_.back(), &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
-    this->connect(m_loadIcon_.back(), &QNetworkAccessManager::finished, [&pix](QNetworkReply* reply)
+    this->connect(m_loadAvatar_.back(), &QNetworkAccessManager::finished, &loop, &QEventLoop::quit);
+    this->connect(m_loadAvatar_.back(), &QNetworkAccessManager::finished, [&pix](QNetworkReply* reply)
     { pix.loadFromData(QByteArray(reply->readAll()), "jpg"); });
     loop.exec();
     return qMakePair(id, qMakePair(name, pix));
-}
-
-ModelAudio::~ModelAudio()
-{
-    std::for_each(m_loadUser_.begin(), m_loadUser_.end(), std::bind(&QNetworkAccessManager::deleteLater, std::placeholders::_1));
-    std::for_each(m_loadIcon_.begin(), m_loadIcon_.end(), std::bind(&QNetworkAccessManager::deleteLater, std::placeholders::_1));
-    delete m_loadAudio;
-    delete m_loadFriend;
 }
 
 QUrl ModelAudio::findUrlTrack(const QString& id)

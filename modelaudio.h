@@ -33,7 +33,7 @@ class ModelAudio : public QObject, public Observer::AbstractObservable
     using InfoTrack = QPair<bool, std::tuple<Artist, Title, Duration, QUrl>>;
 public:
     explicit ModelAudio(QObject* parent = nullptr);
-    ~ModelAudio() override;
+    ~ModelAudio() override = default;
 
     QUrl findUrlTrack(const QString& id);
     QString getNextIdTrack(const QString& id);
@@ -60,18 +60,18 @@ private slots:
     void parserUser(QNetworkReply* reply);
 
 private:
-    QNetworkAccessManager                   *m_loadFriend       = new QNetworkAccessManager;
-    QNetworkAccessManager                   *m_loadAudio        = new QNetworkAccessManager;
-    QNetworkAccessManager                   *m_loadGlobalAudio  = new QNetworkAccessManager;
+    QNetworkAccessManager                   *m_loadFriend       = new QNetworkAccessManager(this);
+    QNetworkAccessManager                   *m_loadAudio        = new QNetworkAccessManager(this);
+    QNetworkAccessManager                   *m_loadGlobalAudio  = new QNetworkAccessManager(this);
     QVector<QNetworkAccessManager*>         m_loadUser_;
-    QVector<QNetworkAccessManager*>         m_loadIcon_;
+    QVector<QNetworkAccessManager*>         m_loadAvatar_;
     QVector<Observer::AbstractObserver*>    m_observer_;
     QVector<InfoTrack>                              m_vecInfoTrack_;
     QHash<IdTrack, QVector<InfoTrack>::iterator>    m_hashInfoTrack_;
     QHash<IdUser, QPair<QString, QPixmap>> m_infoFriend_;
     QPair<IdUser, QPair<QString, QPixmap>> m_infoMy;
     QString m_token;
-    int m_countFriend = 0;
+    int     m_countFriend = 0;
 
     QPair<IdUser, QPair<QString, QPixmap>> getResultParserUser(const QByteArray& array);
 };

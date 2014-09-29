@@ -43,7 +43,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectNextTrack(QString)),   SLOT(setNextTrack(QString)));
     this->connect(item, SIGNAL(selectPrevTrack(QString)),   SLOT(setPrevTrack(QString)));
     this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
-    this->connect(item, SIGNAL(selectRandomTrack(bool)), SLOT(setRandomTrack(bool)));
+    this->connect(item, SIGNAL(selectRandomTrack(bool)),    SLOT(setRandomTrack(bool)));
     this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
     this->connect(item, SIGNAL(returnPressedSearch(QString)),     SLOT(filterTrack(QString)));
 }

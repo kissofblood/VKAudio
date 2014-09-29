@@ -68,14 +68,14 @@ private slots:
     void filterTrack(const QString& text);
 
 private:
-    QWebView        *m_authorization        = new QWebView;
-    QQuickView      *m_quickView            = new QQuickView;
-    QWidget         *m_quickWidget          = nullptr;
-    ModelAudio      *m_modelAudio           = new ModelAudio(this);
-    QBuffer         *m_bufferTrack          = new QBuffer(this);
-    QMediaPlayer    *m_player               = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
-    AvatarProvider  *m_avatar               = nullptr;
-    QNetworkAccessManager       *m_loadTrack = nullptr;
+    QWebView        *m_authorization            = new QWebView;
+    QQuickView      *m_quickView                = new QQuickView;
+    QWidget         *m_quickWidget              = nullptr;
+    ModelAudio      *m_modelAudio               = new ModelAudio(this);
+    QBuffer         *m_bufferTrack              = new QBuffer(this);
+    QMediaPlayer    *m_player                   = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
+    AvatarProvider  *m_avatar                   = nullptr;
+    QNetworkAccessManager       *m_loadTrack    = nullptr;
     QList<QObject*> m_propertyModelAudio_;
     QList<QObject*> m_propertyModelFriend_;
     bool m_isRandomTrack = false;

@@ -25,6 +25,24 @@ Item {
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
 
+    function currentMidFriend() {
+        var pathCount
+        if(pathView.count < pathView.pathItemCount)
+            pathCount = pathView.count / 2
+        else
+            pathCount = pathView.pathItemCount / 2
+
+        var currentIndexMid = pathView.currentIndex + pathCount
+        if(currentIndexMid < pathView.count)
+            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[currentIndexMid].idFriend
+        else
+        {
+            currentIndexMid = currentIndexMid - pathView.count
+            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[currentIndexMid].idFriend
+        }
+        searchFriend.text = vkFriendModel[currentIndexMid].nameFriend
+    }
+
     width: 800
     height: 1280
 
@@ -76,7 +94,7 @@ Item {
         height: 60
         color: "black"
 
-    Rectangle {
+        Rectangle {
             anchors.bottom: player.bottom
             width: parent.width
             height: 5
@@ -93,14 +111,22 @@ Item {
             spacing: 6
 
             Rectangle {
-                id: friend
-                width: 48
-                height: 48
-                color: clickedFriend.pressed ? "red" : "green"
+                id: avatarWindow
+                width: 50
+                height: 50
+                border.color: "#33b5e5"
+                border.width: 2
+
+                Image {
+                    id: avatarWindowImage
+                    width: avatarWindow.width - 2
+                    height: avatarWindow.height - 2
+                    anchors.centerIn: avatarWindow
+                }
 
                 MouseArea {
                     id: clickedFriend
-                    anchors.fill: friend
+                    anchors.fill: avatarWindow
                     onClicked: {
                         listFriend.visible = true
                     }
@@ -555,79 +581,113 @@ Item {
         height: parent.height
         visible: false
 
-        RowLayout {
-            id: rowLayout
-            spacing: 0
-            width: listFriend.width - 200
-            height: listFriend.height
-            visible: true
+        PathView {
+            id: pathView
+            anchors.fill: parent
+            model: vkFriendModel
+            pathItemCount: 20
+            path: Path {
+                startX: 0
+                startY: 0
 
-            Rectangle {
-                id: exit
-                anchors.verticalCenter: listFriend.verticalCenter
-                Layout.fillWidth: true
-                Layout.minimumWidth: 50
-                Layout.minimumHeight: 30
-                Layout.maximumWidth: 100
-                Layout.maximumHeight: 30
-                antialiasing: true
-                radius: 5
-                color: "red"
+                PathAttribute { name: "size"; value: sizePixNormal; }
+
+                PathCurve {
+                    y: pathView.height / 2 - 100
+                    x: pathView.width / 2
+                }
+
+                PathAttribute { name: "size"; value: sizePixNormal; }
+                PathPercent { value: 0.49; }
+                PathLine { relativeX: 0; relativeY: 0; }
+                PathAttribute { name: "size"; value: sizePixIncrease; }
+
+                PathCurve {
+                    y: pathView.height / 2 + 100
+                    x: pathView.width / 2
+                }
+
+                PathAttribute { name: "size"; value: sizePixIncrease; }
+                PathLine { relativeX: 0; relativeY: 0; }
+                PathAttribute { name: "size"; value: sizePixNormal; }
+                PathPercent { value: 0.51; }
+
+                PathCurve {
+                    x: 0
+                    y:  pathView.height
+                }
             }
+            delegate: Rectangle {
+                id: currentAvatarFriend
+                width: PathView.size + 2
+                height: PathView.size + 2
+                border.color: {
+                    if(height == sizePixIncrease + 2 && width == sizePixIncrease + 2)
+                        return "#33b5e5"
+                    return "transparent"
+                }
+                border.width: 2
 
-            TextField {
-                anchors.leftMargin: exit.anchors.rightMargin
-                anchors.verticalCenter: listFriend.verticalCenter
-                Layout.fillWidth: true
-                Layout.minimumWidth: 40
-                Layout.minimumHeight: 30
-                Layout.maximumWidth: 200
-                Layout.maximumHeight: 30
-            }
-
-            PathView {
-                id: pathView
-                anchors.fill: parent
-                model: vkFriendModel
-                pathItemCount: 20
-                path: Path {
-                    startX: 0
-                    startY: 0
-
-                    PathAttribute { name: "size"; value: sizePixNormal; }
-
-                    PathCurve {
-                        id: curve
-                        y: pathView.height / 2 - 100
-                        x: pathView.width / 2
+                Image {
+                    source: "image://avatarFriend/" + idFriend
+                    anchors.centerIn: currentAvatarFriend
+                    width: {
+                        if(currentAvatarFriend.width == sizePixIncrease + 2)
+                            return currentAvatarFriend.width - 2
+                        return currentAvatarFriend.width
                     }
-
-                    PathAttribute { name: "size"; value: sizePixNormal; }
-                    PathPercent { value: 0.49; }
-                    PathLine { relativeX: 0; relativeY: 0; }
-                    PathAttribute { name: "size"; value: sizePixIncrease; }
-
-                    PathCurve {
-                        y: pathView.height / 2 + 100
-                        x: pathView.width / 2
-
-                    }
-
-                    PathAttribute { name: "size"; value: sizePixIncrease; }
-                    PathLine { relativeX: 0; relativeY: 0; }
-                    PathAttribute { name: "size"; value: sizePixNormal; }
-                    PathPercent { value: 0.51; }
-
-                    PathCurve {
-                        x: 0
-                        y:  pathView.height
+                    height: {
+                        if(currentAvatarFriend.height == sizePixIncrease + 2)
+                            return currentAvatarFriend.height - 2
+                        return currentAvatarFriend.height
                     }
                 }
-                delegate: Image {
-                        source: "image://avatarFriend/" + idFriend
-                        width: PathView.size
-                        height: PathView.size
-                    }
+            }
+
+            MouseArea {
+                anchors.fill: pathView
+                onClicked: currentMidFriend()
+            }
+        }
+
+        Rectangle {
+            id: exitListFriend
+            anchors.verticalCenter: listFriend.verticalCenter
+            width: 50
+            height: 30
+            color: "red"
+
+            MouseArea {
+                anchors.fill: exitListFriend
+                onClicked: {
+                    currentMidFriend()
+                    listFriend.visible = false
+                }
+            }
+        }
+
+        TextField {
+            id: searchFriend
+            anchors.left: exitListFriend.right
+            anchors.leftMargin: 10
+            anchors.verticalCenter: listFriend.verticalCenter
+            width: 120
+            height: 30
+
+            Connections {
+                onEditingFinished: {
+                    /*for(var i = 0; i < vkFriendModel.length; i++)
+                    {
+                        var friend = new String
+                        friend = vkFriendModel[i];
+                        friend.toLowerCase()
+                        var result = searchFriend.text.toLowerCase()
+                        if(friend.search(result) === -1)
+                            console.debug("-1")
+                        else
+                            console.debug("OK")
+                    }*/
+                }
             }
         }
     }
