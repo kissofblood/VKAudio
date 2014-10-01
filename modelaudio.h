@@ -48,7 +48,7 @@ public:
     void notifyFriendObservers() override;
 
 signals:
-    void loadTrue();
+    void progressDownload(int value);
 
 public slots:
     void getPlaylistMy();
@@ -60,9 +60,9 @@ private slots:
     void parserUser(QNetworkReply* reply);
 
 private:
-    QNetworkAccessManager                   *m_loadFriend       = new QNetworkAccessManager(this);
-    QNetworkAccessManager                   *m_loadAudio        = new QNetworkAccessManager(this);
-    QNetworkAccessManager                   *m_loadGlobalAudio  = new QNetworkAccessManager(this);
+    QNetworkAccessManager                   *m_loadFriend       = nullptr;
+    QNetworkAccessManager                   *m_loadAudio        = nullptr;
+    QNetworkAccessManager                   *m_loadGlobalAudio  = nullptr;
     QVector<QNetworkAccessManager*>         m_loadUser_;
     QVector<QNetworkAccessManager*>         m_loadAvatar_;
     QVector<Observer::AbstractObserver*>    m_observer_;

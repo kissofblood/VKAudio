@@ -49,7 +49,7 @@ public:
     void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack) override;
 
 signals:
-    void progressDownloadValue(int value = 0);
+    void progressDownloadTrack(int value = 0);
     void mediaPositionChanged(qint64 position, const QString& duration);
     void mediaDurationChanged(qint64 duration);
     void idTrackChanged(bool value, const QString& id);

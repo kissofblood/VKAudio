@@ -10,7 +10,7 @@
 class AvatarProvider : public QQuickImageProvider
 {
 public:
-    AvatarProvider(const QHash<QString, QPixmap>&& avatar);
+    AvatarProvider(const QHash<QString, QPixmap>& avatar);
     ~AvatarProvider() override = default;
 
     QPixmap requestPixmap(const QString& id, QSize*, const QSize&) override;

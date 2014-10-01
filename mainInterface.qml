@@ -22,25 +22,21 @@ Item {
     signal selectPrevTrack(string id)
     signal selectLoopTrack(bool value)
     signal selectRandomTrack(bool value)
+    signal selectPlaylistFriend(string id)
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
 
-    function currentMidFriend() {
+    function currentMidFriend(currentIndex) {
         var pathCount
         if(pathView.count < pathView.pathItemCount)
             pathCount = pathView.count / 2
         else
             pathCount = pathView.pathItemCount / 2
 
-        var currentIndexMid = pathView.currentIndex + pathCount
+        var currentIndexMid = currentIndex + pathCount
         if(currentIndexMid < pathView.count)
-            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[currentIndexMid].idFriend
-        else
-        {
-            currentIndexMid = currentIndexMid - pathView.count
-            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[currentIndexMid].idFriend
-        }
-        searchFriend.text = vkFriendModel[currentIndexMid].nameFriend
+            return currentIndexMid
+        return currentIndexMid = currentIndexMid - pathView.count
     }
 
     width: 800
@@ -48,7 +44,7 @@ Item {
 
     Connections {
         target: connectVkAudio
-        onProgressDownloadValue: {
+        onProgressDownloadTrack: {
             progressBar.value = value
             if(value == 100)
             {
@@ -70,6 +66,7 @@ Item {
                     if(vkAudioModel[next].idTrack === id)
                     {
                         listView.currentIndex = next
+                        listView.model.index = next
                         break
                     }
             }
@@ -77,6 +74,7 @@ Item {
                 if(vkAudioModel[prev].idTrack === id)
                 {
                     listView.currentIndex = prev
+                    listView.model.index = prev
                     break
                 }
         }
@@ -646,7 +644,11 @@ Item {
 
             MouseArea {
                 anchors.fill: pathView
-                onClicked: currentMidFriend()
+                onClicked: {
+                    var index = currentMidFriend(pathView.currentIndex)
+                    avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
+                    searchFriend.text = vkFriendModel[index].nameFriend
+                }
             }
         }
 
@@ -660,8 +662,8 @@ Item {
             MouseArea {
                 anchors.fill: exitListFriend
                 onClicked: {
-                    currentMidFriend()
                     listFriend.visible = false
+                    item.selectPlaylistFriend(vkFriendModel[pathView.currentIndex].idFriend)
                 }
             }
         }
@@ -676,17 +678,13 @@ Item {
 
             Connections {
                 onEditingFinished: {
-                    /*for(var i = 0; i < vkFriendModel.length; i++)
+                    for(var i = 0; i < vkFriendModel.length; i++)
                     {
-                        var friend = new String
-                        friend = vkFriendModel[i];
-                        friend.toLowerCase()
-                        var result = searchFriend.text.toLowerCase()
-                        if(friend.search(result) === -1)
-                            console.debug("-1")
-                        else
-                            console.debug("OK")
-                    }*/
+                        var friend = vkFriendModel[i].nameFriend.toLowerCase()
+                        var input = searchFriend.text.toLowerCase();
+                        if(friend.search(input) !== -1)
+                            pathView.currentIndex = currentMidFriend(i);
+                    }
                 }
             }
         }

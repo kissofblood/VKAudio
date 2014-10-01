@@ -23,7 +23,6 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     box->setMargin(0);
     this->setLayout(box);
 
-    this->connect(m_modelAudio, &ModelAudio::loadTrue, m_modelAudio, &ModelAudio::getPlaylistMy);
     this->connect(m_authorization, &QWebView::urlChanged, this, &VkAudio::checkUrl);
     this->connect(m_player, &QMediaPlayer::mediaStatusChanged, this, &VkAudio::mediaStatus);
     this->connect(m_player, &QMediaPlayer::positionChanged, this, [this](quint64 position)
@@ -46,6 +45,13 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectRandomTrack(bool)),    SLOT(setRandomTrack(bool)));
     this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
     this->connect(item, SIGNAL(returnPressedSearch(QString)),     SLOT(filterTrack(QString)));
+    this->connect(item, SIGNAL(selectPlaylistFriend(QString)),  m_modelAudio, SLOT(getPlaylistFriend(QString)));
+
+
+    this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](int value)
+    {
+       qDebug()<<value;
+    });
 }
 
 VkAudio::~VkAudio()
@@ -70,12 +76,12 @@ void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap
         std::tie(id, name, pix) = info;
         m_propertyModelFriend_.push_back(new PropertyModelFriend(name, id, this));
         avatart.insert(id, pix);
-    }
+   }
 
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkFriendModel", QVariant::fromValue(m_propertyModelFriend_));
 
-    m_avatar = new AvatarProvider(qMove(avatart));
+    m_avatar = new AvatarProvider(avatart);
     m_quickView->engine()->addImageProvider("avatarFriend", m_avatar);
 }
 
@@ -107,6 +113,7 @@ void VkAudio::checkUrl(const QUrl& url)
     m_authorization->setVisible(false);
     m_quickWidget->setVisible(true);
     m_modelAudio->findPlaylist(token);
+    m_modelAudio->getPlaylistMy();
 }
 
 void VkAudio::urlTrack(const QString& id)
@@ -116,11 +123,7 @@ void VkAudio::urlTrack(const QString& id)
     QNetworkReply* reply = m_loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
 
     this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    {
-        if(static_cast<int>(total) < 0)
-            return;
-        emit progressDownloadValue(100 * received / total);
-    });
+    { emit progressDownloadTrack(100 * received / total); });
     this->connect(m_loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
     {
         m_bufferTrack->close();
@@ -128,7 +131,7 @@ void VkAudio::urlTrack(const QString& id)
         m_bufferTrack->open(QIODevice::ReadOnly);
         m_player->setMedia(nullptr, m_bufferTrack);
         m_player->play();
-        QTimer::singleShot(100, this, SIGNAL(progressDownloadValue()));
+        QTimer::singleShot(100, this, SIGNAL(progressDownloadTrack()));
     });
 }
 
