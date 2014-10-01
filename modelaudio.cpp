@@ -205,6 +205,9 @@ QString ModelAudio::getRandomIdTrack()
     return QString();
 }
 
+std::tuple<IdUser, QString, QPixmap> ModelAudio::getInfoMy() const
+{ return std::make_tuple(m_infoMy.first, m_infoMy.second.first, m_infoMy.second.second); }
+
 void ModelAudio::setHideTrack(const QString& id, bool value)
 { m_hashInfoTrack_[id]->first = value; }
 

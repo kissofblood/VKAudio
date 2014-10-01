@@ -12,6 +12,7 @@ Item {
     property bool isPlay: true
     property bool isLoop: false
     property bool isRandom: false
+    property string indefinite: "indefinite"
 
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
@@ -23,6 +24,7 @@ Item {
     signal selectLoopTrack(bool value)
     signal selectRandomTrack(bool value)
     signal selectPlaylistFriend(string id)
+    signal selectPlaylistMy()
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
 
@@ -36,7 +38,7 @@ Item {
         var currentIndexMid = currentIndex + pathCount
         if(currentIndexMid < pathView.count)
             return currentIndexMid
-        return currentIndexMid = currentIndexMid - pathView.count
+        return currentIndexMid - pathView.count
     }
 
     width: 800
@@ -120,6 +122,7 @@ Item {
                     width: avatarWindow.width - 2
                     height: avatarWindow.height - 2
                     anchors.centerIn: avatarWindow
+                    source: "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
                 }
 
                 MouseArea {
@@ -581,8 +584,8 @@ Item {
 
         PathView {
             id: pathView
-            anchors.fill: parent
             model: vkFriendModel
+            anchors.fill: parent
             pathItemCount: 20
             path: Path {
                 startX: 0
@@ -627,7 +630,11 @@ Item {
                 border.width: 2
 
                 Image {
-                    source: "image://avatarFriend/" + idFriend
+                    source: {
+                        if(idFriend == indefinite)
+                            currentAvatarFriend.visible = false
+                        return "image://avatarFriend/" + idFriend
+                    }
                     anchors.centerIn: currentAvatarFriend
                     width: {
                         if(currentAvatarFriend.width == sizePixIncrease + 2)
@@ -653,6 +660,32 @@ Item {
         }
 
         Rectangle {
+            id: avatarMy
+            y: pathView.height / 2 - 50
+            x: pathView.width / 2 + 80
+            width: sizePixIncrease
+            height: sizePixIncrease
+            border.color: "#33b5e5"
+            border.width: 2
+
+            Image {
+                anchors.centerIn: avatarMy
+                width: avatarMy.width - 2
+                height: avatarMy.height - 2
+                source: "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
+            }
+
+            MouseArea {
+                anchors.fill: avatarMy
+                onClicked: {
+                    listFriend.visible = false
+                    avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
+                    item.selectPlaylistMy()
+                }
+            }
+        }
+
+        Rectangle {
             id: exitListFriend
             anchors.verticalCenter: listFriend.verticalCenter
             width: 50
@@ -663,7 +696,9 @@ Item {
                 anchors.fill: exitListFriend
                 onClicked: {
                     listFriend.visible = false
-                    item.selectPlaylistFriend(vkFriendModel[pathView.currentIndex].idFriend)
+                    var index = currentMidFriend(pathView.currentIndex)
+                    avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
+                    item.selectPlaylistFriend(vkFriendModel[index].idFriend)
                 }
             }
         }
@@ -682,8 +717,9 @@ Item {
                     {
                         var friend = vkFriendModel[i].nameFriend.toLowerCase()
                         var input = searchFriend.text.toLowerCase();
-                        if(friend.search(input) !== -1)
-                            pathView.currentIndex = currentMidFriend(i);
+                        if(indefinite.search(input) == -1)
+                            if(friend.search(input) !== -1)
+                                pathView.currentIndex = currentMidFriend(i);
                     }
                 }
             }

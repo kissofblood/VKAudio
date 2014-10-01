@@ -39,6 +39,7 @@ public:
     QString getNextIdTrack(const QString& id);
     QString getPrevIdTrack(const QString& id);
     QString getRandomIdTrack();
+    std::tuple<IdUser, QString, QPixmap> getInfoMy() const;
     void setHideTrack(const QString& id, bool value);
     void findPlaylist(const QString& token);
     void globalSearchAudio(const QString& artist);
