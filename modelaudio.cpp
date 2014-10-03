@@ -76,8 +76,8 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
     QEventLoop loopMy;
     QNetworkReply* replyMy = m_loadUser_.back()->get(QNetworkRequest(resultMy));
     this->connect(replyMy, &QNetworkReply::finished, &loopMy, &QEventLoop::quit);
-    this->connect(replyMy, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    { emit progressDownload(100 * received / total); });
+    this->connect(replyMy, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
+        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadUser_.back(), &QNetworkAccessManager::finished, [this](QNetworkReply* reply)
     { m_infoMy = getResultParserUser(reply->readAll()); });
     loopMy.exec();
@@ -108,8 +108,8 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
         QEventLoop loopFriend;
         QNetworkReply* replyFriend = m_loadUser_.back()->get(QNetworkRequest(url));
         this->connect(replyFriend, &QNetworkReply::finished, &loopFriend, &QEventLoop::quit);
-        this->connect(replyFriend, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-        { emit progressDownload(100 * received / total); });
+        this->connect(replyFriend, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
+            std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
         this->connect(m_loadUser_.back(), &QNetworkAccessManager::finished, this, &ModelAudio::parserUser);
         loopFriend.exec();
     }
@@ -151,8 +151,8 @@ QPair<IdUser, QPair<QString, QPixmap>> ModelAudio::getResultParserUser(const QBy
     QPixmap pix;
     QNetworkReply* reply = m_loadAvatar_.back()->get(QNetworkRequest(photo));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    { emit progressDownload(100 * received / total); });
+    this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
+        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadAvatar_.back(), &QNetworkAccessManager::finished, [&pix](QNetworkReply* reply)
     { pix.loadFromData(QByteArray(reply->readAll()), "jpg"); });
     loop.exec();
@@ -234,8 +234,8 @@ void ModelAudio::findPlaylist(const QString& token)
     QEventLoop loop;
     QNetworkReply* reply = m_loadFriend->get(QNetworkRequest(QUrl(result)));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    { emit progressDownload(100 * received / total); });
+    this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
+        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadFriend, &QNetworkAccessManager::finished, this, &ModelAudio::parserFriend);
     loop.exec();
 }
@@ -264,8 +264,8 @@ void ModelAudio::globalSearchAudio(const QString& artist)
     QEventLoop loop;
     QNetworkReply* reply = m_loadGlobalAudio->get(QNetworkRequest(QUrl(result)));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    { emit progressDownload(100 * received / total); });
+    this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
+        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadGlobalAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
     loop.exec();
 }
@@ -328,8 +328,8 @@ void ModelAudio::getPlaylistFriend(const QString& id)
     QEventLoop loop;
     QNetworkReply* reply = m_loadAudio->get(QNetworkRequest(QUrl(result)));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    { emit progressDownload(100 * received / total); });
+    this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
+        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
     loop.exec();
 }

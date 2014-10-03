@@ -69,6 +69,7 @@ private slots:
 
 protected:
     Q_INVOKABLE QString getIdAvatarMy() const;
+    Q_INVOKABLE QString getNameAvatarMy() const;
 
 private:
     QWebView        *m_authorization            = new QWebView;

@@ -83,6 +83,62 @@ Item {
         onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
     }
 
+    Component {
+        id: styleSlider
+
+        SliderStyle {
+            handle: Rectangle {
+                width: 20
+                height: 20
+                radius: height
+                antialiasing: true
+                color: Qt.lighter("#468bb7", 1.2)
+            }
+
+            groove: Item {
+                id: groovItem
+                implicitHeight: 8
+                implicitWidth: 100
+
+                Rectangle {
+                    height: 8
+                    width: groovItem.width
+                    color: "#444"
+                    opacity: 0.8
+                    radius: 2
+
+                    Rectangle {
+                        antialiasing: true
+                        radius: 2
+                        color: "#468bb7"
+                        height: groovItem.height
+                        width: groovItem.width * control.value / control.maximumValue
+                    }
+                }
+            }
+        }
+    }
+
+    Component {
+        id: styleTextField
+
+        TextFieldStyle {
+            textColor: "white"
+            placeholderTextColor: "lightblue"
+            background: BorderImage {
+                source: "qrc:/icon/icon/textinput.png"
+                anchors.leftMargin: 6
+                anchors.rightMargin: 6
+                border.left: 8
+                border.right: 8
+                border.bottom: 8
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+            }
+        }
+    }
+
     Rectangle {
         color: "#212126"
         anchors.fill: parent
@@ -130,6 +186,7 @@ Item {
                     anchors.fill: avatarWindow
                     onClicked: {
                         listFriend.visible = true
+                        inputSearchFriend.focus = true
                     }
                 }
             }
@@ -217,41 +274,6 @@ Item {
                     id: clickedNext
                     anchors.fill: nextTrack
                     onReleased: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
-                }
-            }
-
-            Component {
-                id: styleSlider
-                SliderStyle {
-                    handle: Rectangle {
-                        width: 20
-                        height: 20
-                        radius: height
-                        antialiasing: true
-                        color: Qt.lighter("#468bb7", 1.2)
-                    }
-
-                    groove: Item {
-                        id: groovItem
-                        implicitHeight: 8
-                        implicitWidth: 100
-
-                        Rectangle {
-                            height: 8
-                            width: groovItem.width
-                            color: "#444"
-                            opacity: 0.8
-                            radius: 2
-
-                            Rectangle {
-                                antialiasing: true
-                                radius: 2
-                                color: "#468bb7"
-                                height: groovItem.height
-                                width: groovItem.width * control.value / control.maximumValue
-                            }
-                        }
-                    }
                 }
             }
 
@@ -449,21 +471,7 @@ Item {
         font.pixelSize: 25
         placeholderText: "search"
         onEditingFinished: item.returnPressedSearch(text)
-        style: TextFieldStyle {
-            textColor: "white"
-            placeholderTextColor: "lightblue"
-            background: BorderImage {
-                    source: "qrc:/icon/icon/textinput.png"
-                    anchors.leftMargin: 6
-                    anchors.rightMargin: 6
-                    border.left: 8
-                    border.right: 8
-                    border.bottom: 8
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                }
-        }
+        style: styleTextField
     }
 
     ScrollView {
@@ -520,6 +528,7 @@ Item {
                     id: mouseDelegate
                     anchors.fill: parent
                     onClicked: {
+                        console.debug("fdsfdsfdsfdsfdsfds")
                         listView.currentIndex = model.index
                         item.selectIdTrack(vkAudioModel[listView.currentIndex].idTrack)
                     }
@@ -615,7 +624,7 @@ Item {
 
                 PathCurve {
                     x: 0
-                    y:  pathView.height
+                    y: pathView.height
                 }
             }
             delegate: Rectangle {
@@ -653,8 +662,7 @@ Item {
                 anchors.fill: pathView
                 onClicked: {
                     var index = currentMidFriend(pathView.currentIndex)
-                    avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
-                    searchFriend.text = vkFriendModel[index].nameFriend
+                    inputSearchFriend.text = vkFriendModel[index].nameFriend
                 }
             }
         }
@@ -677,49 +685,98 @@ Item {
 
             MouseArea {
                 anchors.fill: avatarMy
-                onClicked: {
-                    listFriend.visible = false
-                    avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
-                    item.selectPlaylistMy()
-                }
+                onClicked: inputSearchFriend.text = connectVkAudio.getNameAvatarMy()
             }
         }
 
         Rectangle {
-            id: exitListFriend
-            anchors.verticalCenter: listFriend.verticalCenter
-            width: 50
-            height: 30
-            color: "red"
-
-            MouseArea {
-                anchors.fill: exitListFriend
-                onClicked: {
-                    listFriend.visible = false
-                    var index = currentMidFriend(pathView.currentIndex)
-                    avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
-                    item.selectPlaylistFriend(vkFriendModel[index].idFriend)
-                }
-            }
-        }
-
-        TextField {
             id: searchFriend
-            anchors.left: exitListFriend.right
-            anchors.leftMargin: 10
             anchors.verticalCenter: listFriend.verticalCenter
-            width: 120
-            height: 30
+            width: pathView.width / 2 - 80
+            height: 50
+            color: "black"
+            border.width: 1
+            border.color: "#33b5e5"
+            radius: 6
 
-            Connections {
-                onEditingFinished: {
-                    for(var i = 0; i < vkFriendModel.length; i++)
-                    {
-                        var friend = vkFriendModel[i].nameFriend.toLowerCase()
-                        var input = searchFriend.text.toLowerCase();
-                        if(indefinite.search(input) == -1)
-                            if(friend.search(input) !== -1)
-                                pathView.currentIndex = currentMidFriend(i);
+            RowLayout {
+                anchors.fill: searchFriend
+                anchors.leftMargin: 6
+                anchors.rightMargin: 6
+                spacing: 2
+
+                Rectangle {
+                    id: okSearchFriend
+                    anchors.verticalCenter: searchFriend.verticalCenter
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 40
+                    Layout.minimumHeight: 40
+                    color: clickedOkSearchFriend.pressed ? "#222" : "transparent"
+                    radius: 5
+
+                    Image {
+                        anchors.centerIn: okSearchFriend.anchors.centerIn
+                        source: "qrc:/icon/icon/ok.png"
+                    }
+
+                    MouseArea {
+                        id: clickedOkSearchFriend
+                        anchors.fill: okSearchFriend
+                        onReleased: {
+                            listFriend.visible = false
+                            if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy()
+                                    .substring(0, inputSearchFriend.maximumLength))
+                            {
+                                avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
+                                item.selectPlaylistMy()
+                                return
+                            }
+                            var index = currentMidFriend(pathView.currentIndex)
+                            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
+                            inputSearchFriend.text = ""
+                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: cancelSearchFriend
+                    anchors.verticalCenter: searchFriend.verticalCenter
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 40
+                    Layout.minimumHeight: 40
+                    color: clickedCancelSearchFriend.pressed ? "#222" : "transparent"
+                    radius: 5
+
+                    Image {
+                        anchors.centerIn: cancelSearchFriend.anchors.centerIn
+                        source: "qrc:/icon/icon/cancel.png"
+                    }
+
+                    MouseArea {
+                        id: clickedCancelSearchFriend
+                        anchors.fill: cancelSearchFriend
+                        onReleased: listFriend.visible = false
+                    }
+                }
+
+                TextField {
+                    id: inputSearchFriend
+                    Layout.fillWidth: true
+                    Layout.minimumHeight: 40
+                    font.pixelSize: 20
+                    placeholderText: "search"
+                    style: styleTextField
+                    maximumLength: 11
+                    onEditingFinished: {
+                        for(var i = 0; i < vkFriendModel.length; i++)
+                        {
+                            var friend = vkFriendModel[i].nameFriend.toLowerCase()
+                            var input = text.toLowerCase()
+                            if(indefinite.search(input.toLowerCase()) == -1)
+                                if(friend.toLowerCase().search(input.toLowerCase()) !== -1)
+                                    pathView.currentIndex = currentMidFriend(i);
+                        }
                     }
                 }
             }

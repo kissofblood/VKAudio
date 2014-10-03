@@ -13,5 +13,7 @@
         <file>icon/download.png</file>
         <file>icon/add.png</file>
         <file>icon/textinput.png</file>
+        <file>icon/ok.png</file>
+        <file>icon/cancel.png</file>
     </qresource>
 </RCC>

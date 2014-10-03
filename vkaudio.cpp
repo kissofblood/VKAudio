@@ -122,6 +122,9 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
 QString VkAudio::getIdAvatarMy() const
 { return std::get<0>(m_modelAudio->getInfoMy()); }
 
+QString VkAudio::getNameAvatarMy() const
+{ return std::get<1>(m_modelAudio->getInfoMy()); }
+
 void VkAudio::checkUrl(const QUrl& url)
 {
     QUrlQuery query(url.toString().replace('#', '&'));
@@ -140,8 +143,8 @@ void VkAudio::urlTrack(const QString& id)
     m_loadTrack = new QNetworkAccessManager(this);
     QNetworkReply* reply = m_loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
 
-    this->connect(reply, &QNetworkReply::downloadProgress, this, [this](quint64 received, quint64 total)
-    { emit progressDownloadTrack(100 * received / total); });
+    this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&VkAudio::progressDownloadTrack, this,
+        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
     {
         m_bufferTrack->close();
