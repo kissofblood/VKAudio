@@ -13,7 +13,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
                                "&response_type=token"));
     m_quickWidget = QWidget::createWindowContainer(m_quickView);
     m_quickWidget->setVisible(false);
-    //m_authorization->setVisible(false);
+   // m_authorization->setVisible(false);
     m_modelAudio->registerObserver(this);
     m_quickView->rootContext()->setContextProperty("connectVkAudio", this);
 
@@ -30,8 +30,8 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
         QTime displayTime(0, (position / 60000) % 60, (position / 1000) % 60);
         emit mediaPositionChanged(position / 1000, displayTime.toString("mm:ss"));
     });
-    this->connect(m_player, &QMediaPlayer::durationChanged, this, [this](quint64 duration)
-    { emit mediaDurationChanged(duration / 1000); });
+    this->connect(m_player, &QMediaPlayer::durationChanged, std::bind(&VkAudio::mediaDurationChanged, this,
+        std::bind(std::divides<quint64>(), std::placeholders::_1, 1000)));
 
     QQuickItem* item = m_quickView->rootObject();
     this->connect(item, SIGNAL(selectIdTrack(QString)),     SLOT(urlTrack(QString)));
@@ -51,7 +51,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](int value)
     {
-       //qDebug()<<value;
+        qDebug()<<value;
     });
 }
 

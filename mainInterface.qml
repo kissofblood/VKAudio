@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
+import QtGraphicalEffects 1.0
 
 Item {
     id: item
@@ -13,6 +14,7 @@ Item {
     property bool isLoop: false
     property bool isRandom: false
     property string indefinite: "indefinite"
+    property real fastBlurRadius: -1
 
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
@@ -187,7 +189,15 @@ Item {
                     onClicked: {
                         listFriend.visible = true
                         inputSearchFriend.focus = true
+                        fastBlurRadius = 5
                     }
+                }
+
+                FastBlur {
+                    anchors.fill: avatarWindow
+                    source: avatarWindowImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
                 }
             }
 
@@ -204,6 +214,7 @@ Item {
                 radius: 5
 
                 Image {
+                    id: prevTrackImage
                     anchors.verticalCenter: prevTrack.verticalCenter
                     source: "qrc:/icon/icon/player_rew.png"
                 }
@@ -212,6 +223,13 @@ Item {
                     id: clickedPrev
                     anchors.fill: prevTrack
                     onReleased: item.selectPrevTrack(vkAudioModel[listView.currentIndex].idTrack)
+                }
+
+                FastBlur {
+                    anchors.fill: prevTrack
+                    source: prevTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
                 }
             }
 
@@ -251,6 +269,13 @@ Item {
                         }
                     }
                 }
+
+                FastBlur {
+                    anchors.fill: playOrPauseTrack
+                    source: imagePlayOrPause
+                    radius: fastBlurRadius
+                    transparentBorder: true
+                }
             }
 
             Rectangle {
@@ -266,6 +291,7 @@ Item {
                 radius: 5
 
                 Image {
+                    id: nextTrackImage
                     anchors.verticalCenter: nextTrack.verticalCenter
                     source: "qrc:/icon/icon/player_fwd.png"
                 }
@@ -274,6 +300,13 @@ Item {
                     id: clickedNext
                     anchors.fill: nextTrack
                     onReleased: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
+                }
+
+                FastBlur {
+                    anchors.fill: nextTrack
+                    source: nextTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
                 }
             }
 
@@ -287,6 +320,13 @@ Item {
                         font.pixelSize: 20
                         color: "white"
                         text: ""
+
+                        FastBlur {
+                            anchors.fill: nameTrack
+                            source: nameTrack
+                            radius: fastBlurRadius
+                            transparentBorder: true
+                        }
                     }
 
                     Text {
@@ -294,6 +334,13 @@ Item {
                         font.pixelSize: 20
                         color: "white"
                         text: "0:0"
+
+                        FastBlur {
+                            anchors.fill: durationTrack
+                            source: durationTrack
+                            radius: fastBlurRadius
+                            transparentBorder: true
+                        }
                     }
                 }
 
@@ -304,6 +351,13 @@ Item {
                     style: styleSlider
                     value: 0
                     onPressedChanged: item.positionTrackChange(value)
+
+                    FastBlur {
+                        anchors.fill: positionTrack
+                        source: positionTrack
+                        radius: fastBlurRadius
+                        transparentBorder: true
+                    }
                 }
             }
 
@@ -320,6 +374,7 @@ Item {
                 radius: 5
 
                 Image {
+                    id: loopTrackImage
                     anchors.verticalCenter: loopTrack.verticalCenter
                     source: "qrc:/icon/icon/noatunloopsong.png"
                 }
@@ -344,6 +399,13 @@ Item {
                         item.selectLoopTrack(isLoop)
                     }
                 }
+
+                FastBlur {
+                    anchors.fill: loopTrack
+                    source: loopTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
+                }
             }
 
             Rectangle {
@@ -359,6 +421,7 @@ Item {
                 radius: 5
 
                 Image {
+                    id: randowTrackImage
                     anchors.verticalCenter: randowTrack.verticalCenter
                     source: "qrc:/icon/icon/random.png"
                 }
@@ -383,6 +446,13 @@ Item {
                         item.selectRandomTrack(isRandom, vkAudioModel[listView.currentIndex].idTrack)
                     }
                 }
+
+                FastBlur {
+                    anchors.fill: randowTrack
+                    source: randowTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
+                }
             }
 
             Rectangle {
@@ -397,12 +467,21 @@ Item {
                 antialiasing: true
 
                 Image {
+                    id: volumeTrackImage
                     anchors.verticalCenter: volumeTrack.verticalCenter
                     source: "qrc:/icon/icon/player_volume.png"
+                }
+
+                FastBlur {
+                    anchors.fill: volumeTrack
+                    source: volumeTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
                 }
             }
 
             Slider {
+                id: sliderVolume
                 Layout.fillWidth: true
                 style: {
                     widthGroove = 50
@@ -412,6 +491,13 @@ Item {
                 maximumValue: 100
                 value: 100
                 onPressedChanged: item.volumeTrackChange(value)
+
+                FastBlur {
+                    anchors.fill: sliderVolume
+                    source: sliderVolume
+                    radius: fastBlurRadius
+                    transparentBorder: true
+                }
             }
 
             Rectangle {
@@ -427,6 +513,7 @@ Item {
                 radius: 5
 
                 Image {
+                    id: addTrackImage
                     anchors.verticalCenter: addTrack.verticalCenter
                     source: "qrc:/icon/icon/add.png"
                 }
@@ -434,6 +521,13 @@ Item {
                 MouseArea {
                     id: clickedAdd
                     anchors.fill: addTrack
+                }
+
+                FastBlur {
+                    anchors.fill: addTrack
+                    source: addTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
                 }
             }
 
@@ -450,6 +544,7 @@ Item {
                 radius: 5
 
                 Image {
+                    id: downloadTrackImage
                     anchors.verticalCenter: downloadTrack.verticalCenter
                     source: "qrc:/icon/icon/download.png"
                 }
@@ -458,6 +553,13 @@ Item {
                     id: clickedDonwload
                     anchors.fill: downloadTrack
                     onReleased: item.clickedDownloadTrack(nameTrack.text)
+                }
+
+                FastBlur {
+                    anchors.fill: downloadTrack
+                    source: downloadTrackImage
+                    radius: fastBlurRadius
+                    transparentBorder: true
                 }
             }
         }
@@ -472,6 +574,13 @@ Item {
         placeholderText: "search"
         onEditingFinished: item.returnPressedSearch(text)
         style: styleTextField
+
+        FastBlur {
+            anchors.fill: searchTrack
+            source: searchTrack
+            radius: fastBlurRadius
+            transparentBorder: true
+        }
     }
 
     ScrollView {
@@ -481,25 +590,25 @@ Item {
         height: parent.height - searchTrack.height - player.height - progressBar.height
         flickableItem.interactive: true
         style: ScrollViewStyle {
-             transientScrollBars: true
-             handle: Item {
-                 implicitWidth: 15
-                 implicitHeight: 25
+            transientScrollBars: true
+            handle: Item {
+                implicitWidth: 15
+                implicitHeight: 25
 
-                 Rectangle {
-                     color: "#424246"
-                     anchors.fill: parent
-                     anchors.topMargin: 6
-                     anchors.leftMargin: 4
-                     anchors.rightMargin: 4
-                     anchors.bottomMargin: 6
-                 }
-             }
-             scrollBarBackground: Item {
-                 implicitWidth: 15
-                 implicitHeight: 25
-             }
-         }
+                Rectangle {
+                    color: "#424246"
+                    anchors.fill: parent
+                    anchors.topMargin: 6
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 4
+                    anchors.bottomMargin: 6
+                }
+            }
+            scrollBarBackground: Item {
+                implicitWidth: 15
+                implicitHeight: 25
+            }
+        }
 
         ListView {
             id: listView
@@ -510,6 +619,7 @@ Item {
                 height: 70
 
                 Rectangle {
+                    id: qwer
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.rightMargin: 8
@@ -528,34 +638,75 @@ Item {
                     id: mouseDelegate
                     anchors.fill: parent
                     onClicked: {
-                        console.debug("fdsfdsfdsfdsfdsfds")
                         listView.currentIndex = model.index
                         item.selectIdTrack(vkAudioModel[listView.currentIndex].idTrack)
                     }
                 }
 
                 Text {
+                    id: textArtist
                     anchors.verticalCenter: parent.verticalCenter
                     color: "white"
                     text: artist
                     font.pixelSize: 15
+
+                    FastBlur {
+                        anchors.fill: textArtist
+                        source: textArtist
+                        radius: {
+                            if(fastBlurRadius == -1)
+                                visible = false
+                            else
+                                visible = true
+                            return fastBlurRadius
+                        }
+                        transparentBorder: true
+                    }
                 }
 
                 Text {
+                    id: textTitle
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.centerIn: parent
                     color: "white"
                     text: title
                     font.pointSize: 11
+
+                    FastBlur {
+                        anchors.fill: textTitle
+                        source: textTitle
+                        radius: {
+                            if(fastBlurRadius == -1)
+                                visible = false
+                            else
+                                visible = true
+                            return fastBlurRadius
+                        }
+                        transparentBorder: true
+                    }
                 }
 
                 Text {
+                    id: textDuration
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
                     anchors.rightMargin: 15
                     color: "white"
                     text: duration
                     font.pointSize: 11
+
+                    FastBlur {
+                        anchors.fill: textDuration
+                        source: textDuration
+                        radius: {
+                            if(fastBlurRadius == -1)
+                                visible = false
+                            else
+                                visible = true
+                            return fastBlurRadius
+                        }
+                        transparentBorder: true
+                    }
                 }
             }
         }
@@ -587,8 +738,7 @@ Item {
 
     Item {
         id: listFriend
-        width: parent.width / 2
-        height: parent.height
+        anchors.fill: parent
         visible: false
 
         PathView {
@@ -604,7 +754,7 @@ Item {
 
                 PathCurve {
                     y: pathView.height / 2 - 100
-                    x: pathView.width / 2
+                    x: pathView.width / 2 / 2
                 }
 
                 PathAttribute { name: "size"; value: sizePixNormal; }
@@ -614,7 +764,7 @@ Item {
 
                 PathCurve {
                     y: pathView.height / 2 + 100
-                    x: pathView.width / 2
+                    x: pathView.width / 2 / 2
                 }
 
                 PathAttribute { name: "size"; value: sizePixIncrease; }
@@ -626,6 +776,10 @@ Item {
                     x: 0
                     y: pathView.height
                 }
+            }
+            onMovementEnded: {
+                var index = currentMidFriend(currentIndex)
+                inputSearchFriend.text = vkFriendModel[index].nameFriend
             }
             delegate: Rectangle {
                 id: currentAvatarFriend
@@ -670,13 +824,14 @@ Item {
         Rectangle {
             id: avatarMy
             y: pathView.height / 2 - 50
-            x: pathView.width / 2 + 80
+            x: pathView.width / 2 / 2 + 80
             width: sizePixIncrease
             height: sizePixIncrease
             border.color: "#33b5e5"
             border.width: 2
 
             Image {
+                id: qwe
                 anchors.centerIn: avatarMy
                 width: avatarMy.width - 2
                 height: avatarMy.height - 2
@@ -692,7 +847,7 @@ Item {
         Rectangle {
             id: searchFriend
             anchors.verticalCenter: listFriend.verticalCenter
-            width: pathView.width / 2 - 80
+            width: pathView.width / 2 / 2 - 80
             height: 50
             color: "black"
             border.width: 1
@@ -703,6 +858,7 @@ Item {
                 anchors.fill: searchFriend
                 anchors.leftMargin: 6
                 anchors.rightMargin: 6
+                width: 50
                 spacing: 2
 
                 Rectangle {
@@ -715,7 +871,7 @@ Item {
                     radius: 5
 
                     Image {
-                        anchors.centerIn: okSearchFriend.anchors.centerIn
+                        anchors.centerIn: okSearchFriend
                         source: "qrc:/icon/icon/ok.png"
                     }
 
@@ -724,6 +880,7 @@ Item {
                         anchors.fill: okSearchFriend
                         onReleased: {
                             listFriend.visible = false
+                            fastBlurRadius = -1
                             if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy()
                                     .substring(0, inputSearchFriend.maximumLength))
                             {
@@ -734,8 +891,7 @@ Item {
                             var index = currentMidFriend(pathView.currentIndex)
                             avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
                             inputSearchFriend.text = ""
-                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)
-                        }
+                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)                        }
                     }
                 }
 
@@ -749,14 +905,17 @@ Item {
                     radius: 5
 
                     Image {
-                        anchors.centerIn: cancelSearchFriend.anchors.centerIn
+                        anchors.centerIn: cancelSearchFriend
                         source: "qrc:/icon/icon/cancel.png"
                     }
 
                     MouseArea {
                         id: clickedCancelSearchFriend
                         anchors.fill: cancelSearchFriend
-                        onReleased: listFriend.visible = false
+                        onReleased: {
+                            listFriend.visible = false
+                            fastBlurRadius = -1
+                        }
                     }
                 }
 
