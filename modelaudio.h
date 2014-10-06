@@ -49,7 +49,7 @@ public:
     void notifyFriendObservers() override;
 
 signals:
-    void progressDownload(int value);
+    void progressDownload(qint64 value);
 
 public slots:
     void getPlaylistMy();
@@ -61,11 +61,6 @@ private slots:
     void parserUser(QNetworkReply* reply);
 
 private:
-    QNetworkAccessManager                   *m_loadFriend       = nullptr;
-    QNetworkAccessManager                   *m_loadAudio        = nullptr;
-    QNetworkAccessManager                   *m_loadGlobalAudio  = nullptr;
-    QVector<QNetworkAccessManager*>         m_loadUser_;
-    QVector<QNetworkAccessManager*>         m_loadAvatar_;
     QVector<Observer::AbstractObserver*>    m_observer_;
     QVector<InfoTrack>                              m_vecInfoTrack_;
     QHash<IdTrack, QVector<InfoTrack>::iterator>    m_hashInfoTrack_;

@@ -891,7 +891,8 @@ Item {
                             var index = currentMidFriend(pathView.currentIndex)
                             avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
                             inputSearchFriend.text = ""
-                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)                        }
+                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)
+                        }
                     }
                 }
 

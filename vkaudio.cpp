@@ -49,9 +49,10 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectPlaylistMy()), m_modelAudio, SLOT(getPlaylistMy()));
 
 
-    this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](int value)
+    this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
     {
         qDebug()<<value;
+        //emit progressDownloadTrack(value);
     });
 }
 
@@ -144,7 +145,7 @@ void VkAudio::urlTrack(const QString& id)
     QNetworkReply* reply = m_loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
 
     this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&VkAudio::progressDownloadTrack, this,
-        std::bind(std::divides<int>(), std::bind(std::multiplies<int>(), 100, std::placeholders::_1), std::placeholders::_2)));
+        std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(m_loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
     {
         m_bufferTrack->close();
