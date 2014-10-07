@@ -31,7 +31,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
         emit mediaPositionChanged(position / 1000, displayTime.toString("mm:ss"));
     });
     this->connect(m_player, &QMediaPlayer::durationChanged, std::bind(&VkAudio::mediaDurationChanged, this,
-        std::bind(std::divides<quint64>(), std::placeholders::_1, 1000)));
+        std::bind(std::divides<qint64>(), std::placeholders::_1, 1000)));
 
     QQuickItem* item = m_quickView->rootObject();
     this->connect(item, SIGNAL(selectIdTrack(QString)),     SLOT(urlTrack(QString)));
@@ -47,6 +47,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(returnPressedSearch(QString)),     SLOT(filterTrack(QString)));
     this->connect(item, SIGNAL(selectPlaylistFriend(QString)),    m_modelAudio, SLOT(getPlaylistFriend(QString)));
     this->connect(item, SIGNAL(selectPlaylistMy()), m_modelAudio, SLOT(getPlaylistMy()));
+    this->connect(item, SIGNAL(addTrack(QString, QString)), m_modelAudio, SLOT(addTrack(QString, QString)));
 
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
@@ -140,13 +141,12 @@ void VkAudio::checkUrl(const QUrl& url)
 
 void VkAudio::urlTrack(const QString& id)
 {
-    m_loadTrack->deleteLater();
-    m_loadTrack = new QNetworkAccessManager(this);
-    QNetworkReply* reply = m_loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
+    QNetworkAccessManager* loadTrack = new QNetworkAccessManager(this);
+    QNetworkReply* reply = loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
 
     this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&VkAudio::progressDownloadTrack, this,
         std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
-    this->connect(m_loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
+    this->connect(loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
     {
         m_bufferTrack->close();
         m_bufferTrack->setData(reply->readAll());
@@ -155,6 +155,7 @@ void VkAudio::urlTrack(const QString& id)
         m_player->play();
         QTimer::singleShot(100, this, SIGNAL(progressDownloadTrack()));
     });
+    this->connect(reply, &QNetworkReply::finished, loadTrack, &QNetworkAccessManager::deleteLater);
 }
 
 void VkAudio::setPositionPlayer(int position)

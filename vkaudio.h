@@ -80,7 +80,6 @@ private:
     QMediaPlayer    *m_player                   = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
     AvatarProvider  *m_avatarFriend             = nullptr;
     AvatarProvider  *m_avatarMy                 = nullptr;
-    QNetworkAccessManager       *m_loadTrack    = nullptr;
     QList<QObject*> m_propertyModelAudio_;
     QList<QObject*> m_propertyModelFriend_;
     bool m_isRandomTrack = false;

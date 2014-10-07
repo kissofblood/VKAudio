@@ -54,6 +54,7 @@ signals:
 public slots:
     void getPlaylistMy();
     void getPlaylistFriend(const QString& id);
+    void addTrack(const QString& trackId, const QString& userId);
 
 private slots:
     void parserAudio(QNetworkReply* reply);
@@ -70,6 +71,7 @@ private:
     int     m_countFriend = 0;
 
     QPair<IdUser, QPair<QString, QPixmap>> getResultParserUser(const QByteArray& array);
+    QString makeWorkUrl(const QString& url);
 };
 
 #endif // MODELAUDIO_H

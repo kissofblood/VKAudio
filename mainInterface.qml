@@ -7,14 +7,17 @@ import QtGraphicalEffects 1.0
 Item {
     id: item
 
-    property int widthGroove: 500
-    property int sizePixNormal: 60
-    property int sizePixIncrease: 100
+    property real widthGroove: 500
+    property real sizePixNormal: 60
+    property real sizePixIncrease: 100
     property bool isPlay: true
     property bool isLoop: false
     property bool isRandom: false
     property string indefinite: "indefinite"
     property real fastBlurRadius: -1
+    property bool visibleOkAddTrack: false
+    property bool visibleCancelRemoveTrack: false
+    property real indexFriend: -1
 
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
@@ -29,6 +32,7 @@ Item {
     signal selectPlaylistMy()
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
+    signal addTrack(string trackId, string userId)
 
     function currentMidFriend(currentIndex) {
         var pathCount
@@ -71,6 +75,7 @@ Item {
                     {
                         listView.currentIndex = next
                         listView.model.index = next
+                        listView.displayMarginBeginning = next
                         break
                     }
             }
@@ -79,10 +84,11 @@ Item {
                 {
                     listView.currentIndex = prev
                     listView.model.index = prev
+                    listView.displayMarginBeginning = prev
                     break
                 }
         }
-        onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
+        onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.model.index].idTrack)
     }
 
     Component {
@@ -708,6 +714,62 @@ Item {
                         transparentBorder: true
                     }
                 }
+
+                Rectangle {
+                    id: cancelRemoveTrack
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: textDuration.left
+                    width: 40
+                    height: 40
+                    color: clickedCancelRemoveTrack.pressed ? "#424246" : "transparent"
+                    radius: 5
+                    visible: visibleCancelRemoveTrack
+
+                    Image {
+                        anchors.centerIn: cancelRemoveTrack
+                        source: "qrc:/icon/icon/cancel.png"
+                    }
+
+                    MouseArea {
+                        id: clickedCancelRemoveTrack
+                        anchors.fill: cancelRemoveTrack
+                    }
+                }
+
+                Rectangle {
+                    id: okAddTrack
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.right: visible ? textDuration.left : cancelRemoveTrack.left
+                    width: 40
+                    height: 40
+                    color: clickedOkAddTrack.pressed ? "#424246" : "transparent"
+                    radius: 5
+                    visible: visibleOkAddTrack
+
+                    Image {
+                        id: okAddTrackImage
+                        anchors.centerIn: okAddTrack
+                        source: "qrc:/icon/icon/ok.png"
+                    }
+
+                    ColorOverlay {
+                        id: colorOkAddTrack
+                        anchors.fill: okAddTrackImage
+                        source: okAddTrackImage
+                        color: "#555555"
+                        visible: false
+                    }
+
+                    MouseArea {
+                        id: clickedOkAddTrack
+                        anchors.fill: okAddTrack
+                        onReleased: {
+                            item.addTrack(vkAudioModel[model.index].idTrack, vkFriendModel[indexFriend].idFriend)
+                            okAddTrack.enabled = false
+                            colorOkAddTrack.visible = true
+                        }
+                    }
+                }
             }
         }
     }
@@ -886,12 +948,14 @@ Item {
                             {
                                 avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
                                 item.selectPlaylistMy()
+                                visibleOkAddTrack = false
                                 return
                             }
-                            var index = currentMidFriend(pathView.currentIndex)
-                            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[index].idFriend
+                            indexFriend = currentMidFriend(pathView.currentIndex)
+                            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[indexFriend].idFriend
                             inputSearchFriend.text = ""
-                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)
+                            item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
+                            visibleOkAddTrack = true
                         }
                     }
                 }
@@ -933,8 +997,8 @@ Item {
                         {
                             var friend = vkFriendModel[i].nameFriend.toLowerCase()
                             var input = text.toLowerCase()
-                            if(indefinite.search(input.toLowerCase()) == -1)
-                                if(friend.toLowerCase().search(input.toLowerCase()) !== -1)
+                            if(indefinite.search(input) == -1)
+                                if(friend.search(input) !== -1)
                                     pathView.currentIndex = currentMidFriend(i);
                         }
                     }

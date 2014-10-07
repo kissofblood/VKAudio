@@ -61,18 +61,11 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
     queryUserMy.addQueryItem("fields", "photo_100");
     queryUserMy.addQueryItem("v", "5.24");
     queryUserMy.addQueryItem("access_token", m_token);
-    QString resultMy = queryUserMy.toString();
-    for(int i = 0; i < resultMy.length(); i++)
-        if(resultMy[i] == '&')
-        {
-            resultMy.replace(i, 1, '?');
-            break;
-        }
 
     QNetworkAccessManager* loadUserMy = new QNetworkAccessManager(this);
 
     QEventLoop loopMy;
-    QNetworkReply* replyMy = loadUserMy->get(QNetworkRequest(resultMy));
+    QNetworkReply* replyMy = loadUserMy->get(QNetworkRequest(makeWorkUrl(queryUserMy.toString())));
     this->connect(replyMy, &QNetworkReply::finished, &loopMy, &QEventLoop::quit);
     //this->connect(replyMy, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
       //  std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
@@ -160,6 +153,18 @@ QPair<IdUser, QPair<QString, QPixmap>> ModelAudio::getResultParserUser(const QBy
     return qMakePair(id, qMakePair(name, pix));
 }
 
+QString ModelAudio::makeWorkUrl(const QString& url)
+{
+    QString result = url;
+    for(int i = 0; i < result.length(); i++)
+        if(result[i] == '&')
+        {
+            result.replace(i, 1, '?');
+            break;
+        }
+    return qMove(result);
+}
+
 QUrl ModelAudio::findUrlTrack(const QString& id)
 { return std::get<3>(m_hashInfoTrack_[id]->second); }
 
@@ -221,16 +226,8 @@ void ModelAudio::findPlaylist(const QString& token)
     queryFriend.addQueryItem("v", "5.24");
     queryFriend.addQueryItem("access_token", m_token);
 
-    QString result = queryFriend.toString();
-    for(int i = 0; i < result.length(); i++)
-        if(result[i] == '&')
-        {
-            result.replace(i, 1, '?');
-            break;
-        }
-
     QEventLoop loop;
-    QNetworkReply* reply = loadFriend->get(QNetworkRequest(QUrl(result)));
+    QNetworkReply* reply = loadFriend->get(QNetworkRequest(QUrl(makeWorkUrl(queryFriend.toString()))));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
        // std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
@@ -251,16 +248,8 @@ void ModelAudio::globalSearchAudio(const QString& artist)
     query.addQueryItem("v", "5.24");
     query.addQueryItem("access_token", m_token);
 
-    QString result = query.toString();
-    for(int i = 0; i < result.length(); i++)
-        if(result[i] == '&')
-        {
-            result.replace(i, 1, '?');
-            break;
-        }
-
     QEventLoop loop;
-    QNetworkReply* reply = loadGlobalAudio->get(QNetworkRequest(QUrl(result)));
+    QNetworkReply* reply = loadGlobalAudio->get(QNetworkRequest(QUrl(makeWorkUrl(query.toString()))));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
       //  std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
@@ -315,20 +304,25 @@ void ModelAudio::getPlaylistFriend(const QString& id)
     queryAudio.addQueryItem("v", "5.24");
     queryAudio.addQueryItem("access_token", m_token);
 
-    QString result = queryAudio.toString();
-    for(int i = 0; i < result.length(); i++)
-        if(result[i] == '&')
-        {
-            result.replace(i, 1, '?');
-            break;
-        }
-
     QEventLoop loop;
-    QNetworkReply* reply = loadAudio->get(QNetworkRequest(QUrl(result)));
+    QNetworkReply* reply = loadAudio->get(QNetworkRequest(QUrl(makeWorkUrl(queryAudio.toString()))));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
        // std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(loadAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
     this->connect(reply, &QNetworkReply::finished, loadAudio, &QNetworkAccessManager::deleteLater);
     loop.exec();
+}
+
+void ModelAudio::addTrack(const QString& trackId, const QString& userId)
+{
+    QUrlQuery queryAddTrack("https://api.vk.com/method/audio.add");
+    queryAddTrack.addQueryItem("audio_id", trackId);
+    queryAddTrack.addQueryItem("owner_id", userId);
+    queryAddTrack.addQueryItem("v", "5.24");
+    queryAddTrack.addQueryItem("access_token", m_token);
+
+    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
+    QNetworkReply* reply = manager->get(QNetworkRequest(QUrl(makeWorkUrl(queryAddTrack.toString()))));
+    this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
 }
