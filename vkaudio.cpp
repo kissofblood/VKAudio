@@ -48,6 +48,8 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectPlaylistFriend(QString)),    m_modelAudio, SLOT(getPlaylistFriend(QString)));
     this->connect(item, SIGNAL(selectPlaylistMy()), m_modelAudio, SLOT(getPlaylistMy()));
     this->connect(item, SIGNAL(addTrack(QString, QString)), m_modelAudio, SLOT(addTrack(QString, QString)));
+    this->connect(item, SIGNAL(removeTrack(QString, QString, bool)), SLOT(pushRemoveTrack(QString, QString, bool)));
+    this->connect(item, SIGNAL(deleteTrack()), SLOT(deleteAllTrack()));
 
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
@@ -225,4 +227,19 @@ void VkAudio::filterTrack(const QString& text)
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkAudioModel", QVariant::fromValue(result));
+}
+
+void VkAudio::pushRemoveTrack(const QString& trackId, const QString& userId, bool remove)
+{
+    if(remove)
+        m_deleteTrack_.remove(trackId);
+    else
+        m_deleteTrack_.insert(trackId, userId);
+}
+
+void VkAudio::deleteAllTrack()
+{
+    for(auto i = m_deleteTrack_.begin(); i != m_deleteTrack_.end(); i++)
+        m_modelAudio->deleteTrack(i.key(), i.value());
+    m_deleteTrack_.clear();
 }

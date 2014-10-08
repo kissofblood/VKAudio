@@ -47,6 +47,7 @@ public:
     void removeObserver(Observer::AbstractObserver* observer) override;
     void notifyAudioObservers() override;
     void notifyFriendObservers() override;
+    void deleteTrack(const QString& trackId, const QString& userId);
 
 signals:
     void progressDownload(qint64 value);
@@ -62,7 +63,7 @@ private slots:
     void parserUser(QNetworkReply* reply);
 
 private:
-    QVector<Observer::AbstractObserver*>    m_observer_;
+    QVector<Observer::AbstractObserver*>            m_observer_;
     QVector<InfoTrack>                              m_vecInfoTrack_;
     QHash<IdTrack, QVector<InfoTrack>::iterator>    m_hashInfoTrack_;
     QHash<IdUser, QPair<QString, QPixmap>> m_infoFriend_;

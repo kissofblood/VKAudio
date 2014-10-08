@@ -66,6 +66,8 @@ private slots:
     void mediaStatus(QMediaPlayer::MediaStatus status);
     void downloadTrack(const QString& name);
     void filterTrack(const QString& text);
+    void pushRemoveTrack(const QString& trackId, const QString& userId, bool remove);
+    void deleteAllTrack();
 
 protected:
     Q_INVOKABLE QString getIdAvatarMy() const;
@@ -82,6 +84,7 @@ private:
     AvatarProvider  *m_avatarMy                 = nullptr;
     QList<QObject*> m_propertyModelAudio_;
     QList<QObject*> m_propertyModelFriend_;
+    QHash<QString, QString> m_deleteTrack_;
     bool m_isRandomTrack = false;
     bool m_isLoopTrack   = false;
 };

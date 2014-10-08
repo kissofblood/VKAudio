@@ -277,7 +277,7 @@ void ModelAudio::notifyAudioObservers()
         Artist artist;
         Title title;
         Duration duration;
-        std::tie(artist, title, duration, std::ignore) = (*i).second;
+        std::tie(artist, title, duration, std::ignore) = i->second;
         infoTrack.push_back(std::make_tuple(id, artist, title, duration));
     }
     std::for_each(m_observer_.begin(), m_observer_.end(), std::bind(&Observer::AbstractObserver::updatePlaylist, std::placeholders::_1, infoTrack));
@@ -324,5 +324,18 @@ void ModelAudio::addTrack(const QString& trackId, const QString& userId)
 
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
     QNetworkReply* reply = manager->get(QNetworkRequest(QUrl(makeWorkUrl(queryAddTrack.toString()))));
+    this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
+}
+
+void ModelAudio::deleteTrack(const QString& trackId, const QString& userId)
+{
+    QUrlQuery queryDeleteTrack("https://api.vk.com/method/audio.delete.xml");
+    queryDeleteTrack.addQueryItem("audio_id", trackId);
+    queryDeleteTrack.addQueryItem("owner_id", userId);
+    queryDeleteTrack.addQueryItem("v", "5.24");
+    queryDeleteTrack.addQueryItem("access_token", m_token);
+
+    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
+    QNetworkReply* reply = manager->get(QNetworkRequest(QUrl(makeWorkUrl(queryDeleteTrack.toString()))));
     this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
 }

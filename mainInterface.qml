@@ -15,8 +15,6 @@ Item {
     property bool isRandom: false
     property string indefinite: "indefinite"
     property real fastBlurRadius: -1
-    property bool visibleOkAddTrack: false
-    property bool visibleCancelRemoveTrack: false
     property real indexFriend: -1
 
     signal selectIdTrack(string id)
@@ -33,6 +31,8 @@ Item {
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
     signal addTrack(string trackId, string userId)
+    signal removeTrack(string trackId, string userId, bool remover)
+    signal deleteTrack();
 
     function currentMidFriend(currentIndex) {
         var pathCount
@@ -45,6 +45,17 @@ Item {
         if(currentIndexMid < pathView.count)
             return currentIndexMid
         return currentIndexMid - pathView.count
+    }
+
+    function setVisibleAdd(value) {
+        for(var i = 0; i < vkAudioModel.length; i++) {
+            vkAudioModel[i].visibleImageAdd = value
+        }
+    }
+
+    function setVisibleCancel(value) {
+        for(var i = 0; i < vkAudioModel.length; i++)
+            vkAudioModel[i].visibleImageCancel = value
     }
 
     width: 800
@@ -88,7 +99,7 @@ Item {
                     break
                 }
         }
-        onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.model.index].idTrack)
+        onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
     }
 
     Component {
@@ -621,11 +632,11 @@ Item {
             anchors.leftMargin: 6
             model: vkAudioModel
             delegate: Item {
+                id: itemDelegat
                 width: parent.width
                 height: 70
 
                 Rectangle {
-                    id: qwer
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.rightMargin: 8
@@ -634,6 +645,7 @@ Item {
                 }
 
                 Rectangle {
+                    id: backgroundRect
                     anchors.fill: parent
                     anchors.rightMargin: 8
                     color: "#11ffffff"
@@ -643,10 +655,19 @@ Item {
                 MouseArea {
                     id: mouseDelegate
                     anchors.fill: parent
+                    enabled: enableMouse
                     onClicked: {
                         listView.currentIndex = model.index
                         item.selectIdTrack(vkAudioModel[listView.currentIndex].idTrack)
                     }
+                }
+
+                ColorOverlay {
+                    id: colorBackgroundRect
+                    anchors.fill: backgroundRect
+                    source: backgroundRect
+                    color: "#33b5e5"
+                    visible: visibleColorItem
                 }
 
                 Text {
@@ -723,28 +744,45 @@ Item {
                     height: 40
                     color: clickedCancelRemoveTrack.pressed ? "#424246" : "transparent"
                     radius: 5
-                    visible: visibleCancelRemoveTrack
+                    visible: visibleImageCancel
 
                     Image {
+                        id: cancelRemoveTrackImage
                         anchors.centerIn: cancelRemoveTrack
                         source: "qrc:/icon/icon/cancel.png"
+                    }
+
+                    ColorOverlay {
+                        anchors.fill: cancelRemoveTrackImage
+                        source: cancelRemoveTrackImage
+                        color: "#555555"
+                        visible: visibleColorRemove
                     }
 
                     MouseArea {
                         id: clickedCancelRemoveTrack
                         anchors.fill: cancelRemoveTrack
+                        onReleased: {
+                            var index = model.index
+                            cancelRemoveTrack.enabled = false
+                            vkAudioModel[index].enableMouse = false
+                            vkAudioModel[index].visibleColorRemove = true
+                            vkAudioModel[index].visibleImageAdd = true
+                            vkAudioModel[index].visibleColorItem = true
+                            item.removeTrack(vkAudioModel[index].idTrack, connectVkAudio.getIdAvatarMy(), false)
+                        }
                     }
                 }
 
                 Rectangle {
                     id: okAddTrack
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: visible ? textDuration.left : cancelRemoveTrack.left
+                    anchors.right: cancelRemoveTrack.left
                     width: 40
                     height: 40
                     color: clickedOkAddTrack.pressed ? "#424246" : "transparent"
                     radius: 5
-                    visible: visibleOkAddTrack
+                    visible: visibleImageAdd
 
                     Image {
                         id: okAddTrackImage
@@ -753,20 +791,32 @@ Item {
                     }
 
                     ColorOverlay {
-                        id: colorOkAddTrack
                         anchors.fill: okAddTrackImage
                         source: okAddTrackImage
                         color: "#555555"
-                        visible: false
+                        visible: visibleColorAdd
                     }
 
                     MouseArea {
                         id: clickedOkAddTrack
                         anchors.fill: okAddTrack
                         onReleased: {
-                            item.addTrack(vkAudioModel[model.index].idTrack, vkFriendModel[indexFriend].idFriend)
-                            okAddTrack.enabled = false
-                            colorOkAddTrack.visible = true
+                            var index = model.index
+                            if(indexFriend != -1)
+                            {
+                                item.addTrack(vkAudioModel[index].idTrack, vkFriendModel[indexFriend].idFriend)
+                                vkAudioModel[index].visibleColorAdd = true
+                                okAddTrack.enabled = false
+                            }
+                            else
+                            {
+                                vkAudioModel[index].visibleColorRemove = false
+                                vkAudioModel[index].visibleImageAdd = false
+                                vkAudioModel[index].visibleColorItem = false
+                                vkAudioModel[index].enableMouse = true
+                                cancelRemoveTrack.enabled = true
+                                item.removeTrack(vkAudioModel[index].idTrack, connectVkAudio.getIdAvatarMy(), true)
+                            }
                         }
                     }
                 }
@@ -893,7 +943,6 @@ Item {
             border.width: 2
 
             Image {
-                id: qwe
                 anchors.centerIn: avatarMy
                 width: avatarMy.width - 2
                 height: avatarMy.height - 2
@@ -943,19 +992,23 @@ Item {
                         onReleased: {
                             listFriend.visible = false
                             fastBlurRadius = -1
+                            item.deleteTrack()
                             if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy()
                                     .substring(0, inputSearchFriend.maximumLength))
                             {
                                 avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
                                 item.selectPlaylistMy()
-                                visibleOkAddTrack = false
+                                setVisibleAdd(false)
+                                setVisibleCancel(true)
+                                indexFriend = -1
                                 return
                             }
                             indexFriend = currentMidFriend(pathView.currentIndex)
                             avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[indexFriend].idFriend
                             inputSearchFriend.text = ""
                             item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
-                            visibleOkAddTrack = true
+                            setVisibleAdd(true)
+                            setVisibleCancel(false)
                         }
                     }
                 }
