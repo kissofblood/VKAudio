@@ -219,11 +219,11 @@ void VkAudio::filterTrack(const QString& text)
         if(propertyModel->artist().contains(text, Qt::CaseInsensitive)
            || propertyModel->title().contains(text, Qt::CaseInsensitive))
         {
-            m_modelAudio->setHideTrack(propertyModel->idTrack(), false);
+            m_modelAudio->setStateTrack(propertyModel->idTrack(), ModelAudio::StateTrack::Show);
             result.push_back(objectModel);
         }
         else
-            m_modelAudio->setHideTrack(propertyModel->idTrack(), true);
+            m_modelAudio->setStateTrack(propertyModel->idTrack(), ModelAudio::StateTrack::Hide);
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkAudioModel", QVariant::fromValue(result));
@@ -232,9 +232,15 @@ void VkAudio::filterTrack(const QString& text)
 void VkAudio::pushRemoveTrack(const QString& trackId, const QString& userId, bool remove)
 {
     if(remove)
+    {
         m_deleteTrack_.remove(trackId);
+        m_modelAudio->setStateTrack(trackId, ModelAudio::StateTrack::Show);
+    }
     else
+    {
         m_deleteTrack_.insert(trackId, userId);
+        m_modelAudio->setStateTrack(trackId, ModelAudio::StateTrack::Remove);
+    }
 }
 
 void VkAudio::deleteAllTrack()

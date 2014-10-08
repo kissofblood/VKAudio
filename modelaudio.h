@@ -29,9 +29,8 @@
 class ModelAudio : public QObject, public Observer::AbstractObservable
 {
     Q_OBJECT
-
-    using InfoTrack = QPair<bool, std::tuple<Artist, Title, Duration, QUrl>>;
 public:
+    enum class StateTrack { Show, Hide, Remove };
     explicit ModelAudio(QObject* parent = nullptr);
     ~ModelAudio() override = default;
 
@@ -40,7 +39,7 @@ public:
     QString getPrevIdTrack(const QString& id);
     QString getRandomIdTrack();
     std::tuple<IdUser, QString, QPixmap> getInfoMy() const;
-    void setHideTrack(const QString& id, bool value);
+    void setStateTrack(const QString& id, StateTrack state);
     void findPlaylist(const QString& token);
     void globalSearchAudio(const QString& artist);
     void registerObserver(Observer::AbstractObserver* observer) override;
@@ -64,8 +63,8 @@ private slots:
 
 private:
     QVector<Observer::AbstractObserver*>            m_observer_;
-    QVector<InfoTrack>                              m_vecInfoTrack_;
-    QHash<IdTrack, QVector<InfoTrack>::iterator>    m_hashInfoTrack_;
+    QVector<QPair<StateTrack, std::tuple<Artist, Title, Duration, QUrl>>> m_vecInfoTrack_;
+    QHash<IdTrack, QVector<QPair<StateTrack, std::tuple<Artist, Title, Duration, QUrl>>>::iterator> m_hashInfoTrack_;
     QHash<IdUser, QPair<QString, QPixmap>> m_infoFriend_;
     QPair<IdUser, QPair<QString, QPixmap>> m_infoMy;
     QString m_token;

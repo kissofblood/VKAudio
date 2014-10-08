@@ -759,6 +759,19 @@ Item {
                         visible: visibleColorRemove
                     }
 
+                    FastBlur {
+                        anchors.fill: cancelRemoveTrack
+                        source: cancelRemoveTrack
+                        radius: {
+                            if(fastBlurRadius == -1)
+                                visible = false
+                            else
+                                visible = true
+                            return fastBlurRadius
+                        }
+                        transparentBorder: true
+                    }
+
                     MouseArea {
                         id: clickedCancelRemoveTrack
                         anchors.fill: cancelRemoveTrack
@@ -795,6 +808,19 @@ Item {
                         source: okAddTrackImage
                         color: "#555555"
                         visible: visibleColorAdd
+                    }
+
+                    FastBlur {
+                        anchors.fill: okAddTrack
+                        source: okAddTrack
+                        radius: {
+                            if(fastBlurRadius == -1)
+                                visible = false
+                            else
+                                visible = true
+                            return fastBlurRadius
+                        }
+                        transparentBorder: true
                     }
 
                     MouseArea {
