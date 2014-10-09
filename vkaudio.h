@@ -68,6 +68,7 @@ private slots:
     void filterTrack(const QString& text);
     void pushRemoveTrack(const QString& trackId, const QString& userId, bool remove);
     void deleteAllTrack();
+    void openFileForUpload();
 
 protected:
     Q_INVOKABLE QString getIdAvatarMy() const;

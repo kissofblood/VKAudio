@@ -25,6 +25,7 @@
 
 
 #include <QtWidgets>
+#include <QtNetwork>
 
 class ModelAudio : public QObject, public Observer::AbstractObservable
 {
@@ -41,12 +42,12 @@ public:
     std::tuple<IdUser, QString, QPixmap> getInfoMy() const;
     void setStateTrack(const QString& id, StateTrack state);
     void findPlaylist(const QString& token);
-    void globalSearchAudio(const QString& artist);
     void registerObserver(Observer::AbstractObserver* observer) override;
     void removeObserver(Observer::AbstractObserver* observer) override;
     void notifyAudioObservers() override;
     void notifyFriendObservers() override;
     void deleteTrack(const QString& trackId, const QString& userId);
+    void uploadServerTrack(QFile* data);
 
 signals:
     void progressDownload(qint64 value);
@@ -55,6 +56,7 @@ public slots:
     void getPlaylistMy();
     void getPlaylistFriend(const QString& id);
     void addTrack(const QString& trackId, const QString& userId);
+    void globalSearchAudio(const QString& artist);
 
 private slots:
     void parserAudio(QNetworkReply* reply);
@@ -71,7 +73,7 @@ private:
     int     m_countFriend = 0;
 
     QPair<IdUser, QPair<QString, QPixmap>> getResultParserUser(const QByteArray& array);
-    QString makeWorkUrl(const QString& url);
+    QUrl makeWorkUrl(const QString& url);
 };
 
 #endif // MODELAUDIO_H

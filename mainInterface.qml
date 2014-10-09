@@ -30,9 +30,11 @@ Item {
     signal selectPlaylistMy()
     signal clickedDownloadTrack(string name)
     signal returnPressedSearch(string search)
+    signal returnPressedGlobalSearch(string search)
     signal addTrack(string trackId, string userId)
     signal removeTrack(string trackId, string userId, bool remover)
     signal deleteTrack();
+    signal uploadTrack();
 
     function currentMidFriend(currentIndex) {
         var pathCount
@@ -134,6 +136,31 @@ Item {
                         width: groovItem.width * control.value / control.maximumValue
                     }
                 }
+            }
+        }
+    }
+
+    Component {
+        id: scrollViewHandle
+
+        ScrollViewStyle {
+            transientScrollBars: true
+            handle: Item {
+                implicitWidth: 15
+                implicitHeight: 25
+
+                Rectangle {
+                    color: "#424246"
+                    anchors.fill: parent
+                    anchors.topMargin: 6
+                    anchors.leftMargin: 4
+                    anchors.rightMargin: 4
+                    anchors.bottomMargin: 6
+                }
+            }
+            scrollBarBackground: Item {
+                implicitWidth: 15
+                implicitHeight: 25
             }
         }
     }
@@ -518,7 +545,7 @@ Item {
             }
 
             Rectangle {
-                id: addTrack
+                id: uploadTrackRect
                 anchors.verticalCenter: parent.verticalCenter
                 Layout.fillWidth: true
                 Layout.minimumWidth: 50
@@ -530,19 +557,20 @@ Item {
                 radius: 5
 
                 Image {
-                    id: addTrackImage
-                    anchors.verticalCenter: addTrack.verticalCenter
+                    id: uploadTrackImage
+                    anchors.verticalCenter: uploadTrackRect.verticalCenter
                     source: "qrc:/icon/icon/add.png"
                 }
 
                 MouseArea {
                     id: clickedAdd
-                    anchors.fill: addTrack
+                    anchors.fill: uploadTrackRect
+                    onReleased: item.uploadTrack()
                 }
 
                 FastBlur {
-                    anchors.fill: addTrack
-                    source: addTrackImage
+                    anchors.fill: uploadTrackRect
+                    source: uploadTrackImage
                     radius: fastBlurRadius
                     transparentBorder: true
                 }
@@ -601,31 +629,12 @@ Item {
     }
 
     ScrollView {
-        id: scrollView
+        id: scrollViewListTrack
         anchors.top: searchTrack.bottom
-        width: parent.width
+        width: parent.width - rightPanel.width
         height: parent.height - searchTrack.height - player.height - progressBar.height
         flickableItem.interactive: true
-        style: ScrollViewStyle {
-            transientScrollBars: true
-            handle: Item {
-                implicitWidth: 15
-                implicitHeight: 25
-
-                Rectangle {
-                    color: "#424246"
-                    anchors.fill: parent
-                    anchors.topMargin: 6
-                    anchors.leftMargin: 4
-                    anchors.rightMargin: 4
-                    anchors.bottomMargin: 6
-                }
-            }
-            scrollBarBackground: Item {
-                implicitWidth: 15
-                implicitHeight: 25
-            }
-        }
+        style: scrollViewHandle
 
         ListView {
             id: listView
@@ -1081,6 +1090,67 @@ Item {
                                     pathView.currentIndex = currentMidFriend(i);
                         }
                     }
+                }
+            }
+        }
+    }
+
+    Item {
+        id: rightPanel
+        anchors.left: scrollViewListTrack.right
+        anchors.top: searchTrack.bottom
+        width: 280
+        height: parent.height - searchTrack.height - player.height - progressBar.height
+
+        Rectangle {
+            anchors.left: rightPanel.left
+            width: 2
+            height: rightPanel.height
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#237b9c"; }
+                GradientStop { position: 0.7; color: "#33b5e5"; }
+            }
+        }
+
+        ColumnLayout {
+            anchors.fill: rightPanel
+            anchors.leftMargin: 5
+
+            TextField {
+                id: globalSearchTrack
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.maximumWidth: rightPanel.width - 5
+                Layout.minimumHeight: 40
+                font.pixelSize: 25
+                placeholderText: "search"
+                onEditingFinished: {
+                    if(text.length == 0)
+                    {
+                        if(indexFriend == -1)
+                            item.selectPlaylistMy()
+                        else
+                            item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
+                        return
+                    }
+                    item.returnPressedGlobalSearch(text)
+                }
+                style: styleTextField
+            }
+
+            ScrollView {
+                anchors.top: globalSearchTrack.bottom
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.maximumWidth: rightPanel.width - 12
+                Layout.minimumHeight: rightPanel.height - globalSearchTrack.height
+                flickableItem.interactive: true
+                style: scrollViewHandle
+
+                Rectangle {
+                    color: "red"
+                    width: 20
+                    height: 900
                 }
             }
         }

@@ -13,7 +13,7 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
                                "&response_type=token"));
     m_quickWidget = QWidget::createWindowContainer(m_quickView);
     m_quickWidget->setVisible(false);
-   // m_authorization->setVisible(false);
+    //m_authorization->setVisible(false);
     m_modelAudio->registerObserver(this);
     m_quickView->rootContext()->setContextProperty("connectVkAudio", this);
 
@@ -48,8 +48,10 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectPlaylistFriend(QString)),    m_modelAudio, SLOT(getPlaylistFriend(QString)));
     this->connect(item, SIGNAL(selectPlaylistMy()), m_modelAudio, SLOT(getPlaylistMy()));
     this->connect(item, SIGNAL(addTrack(QString, QString)), m_modelAudio, SLOT(addTrack(QString, QString)));
+    this->connect(item, SIGNAL(returnPressedGlobalSearch(QString)), m_modelAudio, SLOT(globalSearchAudio(QString)));
     this->connect(item, SIGNAL(removeTrack(QString, QString, bool)), SLOT(pushRemoveTrack(QString, QString, bool)));
     this->connect(item, SIGNAL(deleteTrack()), SLOT(deleteAllTrack()));
+    this->connect(item, SIGNAL(uploadTrack()), SLOT(openFileForUpload()));
 
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
@@ -248,4 +250,12 @@ void VkAudio::deleteAllTrack()
     for(auto i = m_deleteTrack_.begin(); i != m_deleteTrack_.end(); i++)
         m_modelAudio->deleteTrack(i.key(), i.value());
     m_deleteTrack_.clear();
+}
+
+void VkAudio::openFileForUpload()
+{
+    QString pathFile = QFileDialog::getOpenFileName(this, "Open File", QString(), "*.mp3");
+    QFile* fileOpen = new QFile(pathFile);
+    if(fileOpen->open(QIODevice::ReadOnly))
+        m_modelAudio->uploadServerTrack(fileOpen);
 }
