@@ -2,7 +2,7 @@
 
 VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 {
-    m_quickView->setSource(QUrl("qrc:/mainInterface.qml"));
+    m_quickView->setSource(QUrl("qrc:/qmlInterface/interface.qml"));
     m_quickView->setResizeMode(QQuickView::SizeRootObjectToView);
     m_authorization->load(QUrl("https://oauth.vk.com/authorize?"
                                "client_id=4290375"
@@ -106,20 +106,21 @@ void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap
     m_quickView->engine()->addImageProvider("avatarFriend", m_avatarFriend);
 }
 
-void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack)
+void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>>& infoTrack)
 {
     std::for_each(m_propertyModelAudio_.begin(), m_propertyModelAudio_.end(), std::bind(&QObject::deleteLater, std::placeholders::_1));
     m_propertyModelAudio_.clear();
     for(auto& track : infoTrack)
     {
-        QString id;
+        QString idTrack;
         Artist artist;
         Title title;
         Duration duration;
-        std::tie(id, artist, title, duration) = track;
+        IdUser idUser;
+        std::tie(idTrack, artist, title, duration, idUser) = track;
         int durationMsec = duration * 1000;
         QTime durationTime(0, (durationMsec / 60000) % 60, (durationMsec / 1000) % 60);
-        m_propertyModelAudio_.push_back(new PropertyModelAudio(artist, title, durationTime.toString("mm:ss"), id, this));
+        m_propertyModelAudio_.push_back(new PropertyModelAudio(artist, title, durationTime.toString("mm:ss"), idTrack, idUser, this));
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkAudioModel", QVariant::fromValue(m_propertyModelAudio_));

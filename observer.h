@@ -21,7 +21,7 @@ public:
     virtual ~AbstractObserver() = default;
 
     virtual void updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend) = 0;
-    virtual void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack) = 0;
+    virtual void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>>& infoTrack) = 0;
 };
 
 class AbstractObservable

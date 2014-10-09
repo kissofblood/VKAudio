@@ -30,6 +30,15 @@
 class ModelAudio : public QObject, public Observer::AbstractObservable
 {
     Q_OBJECT
+
+    struct InfoTrack
+    {
+        Artist      artist;
+        Title       title;
+        Duration    duration;
+        QUrl        url;
+        IdUser      ownerId;
+    };
 public:
     enum class StateTrack { Show, Hide, Remove };
     explicit ModelAudio(QObject* parent = nullptr);
@@ -65,8 +74,8 @@ private slots:
 
 private:
     QVector<Observer::AbstractObserver*>            m_observer_;
-    QVector<QPair<StateTrack, std::tuple<Artist, Title, Duration, QUrl>>> m_vecInfoTrack_;
-    QHash<IdTrack, QVector<QPair<StateTrack, std::tuple<Artist, Title, Duration, QUrl>>>::iterator> m_hashInfoTrack_;
+    QVector<QPair<StateTrack, InfoTrack>>           m_vecInfoTrack_;
+    QHash<IdTrack, QVector<QPair<StateTrack, InfoTrack>>::iterator> m_hashInfoTrack_;
     QHash<IdUser, QPair<QString, QPixmap>> m_infoFriend_;
     QPair<IdUser, QPair<QString, QPixmap>> m_infoMy;
     QString m_token;

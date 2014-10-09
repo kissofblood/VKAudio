@@ -46,7 +46,7 @@ public:
     ~VkAudio() override;
 
     void updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend) override;
-    void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration>>& infoTrack) override;
+    void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>>& infoTrack) override;
 
 signals:
     void progressDownloadTrack(qint64 value = 0);

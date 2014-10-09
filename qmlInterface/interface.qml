@@ -3,6 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
+import "setFunction.js" as Script
 
 Item {
     id: item
@@ -35,30 +36,6 @@ Item {
     signal removeTrack(string trackId, string userId, bool remover)
     signal deleteTrack();
     signal uploadTrack();
-
-    function currentMidFriend(currentIndex) {
-        var pathCount
-        if(pathView.count < pathView.pathItemCount)
-            pathCount = pathView.count / 2
-        else
-            pathCount = pathView.pathItemCount / 2
-
-        var currentIndexMid = currentIndex + pathCount
-        if(currentIndexMid < pathView.count)
-            return currentIndexMid
-        return currentIndexMid - pathView.count
-    }
-
-    function setVisibleAdd(value) {
-        for(var i = 0; i < vkAudioModel.length; i++) {
-            vkAudioModel[i].visibleImageAdd = value
-        }
-    }
-
-    function setVisibleCancel(value) {
-        for(var i = 0; i < vkAudioModel.length; i++)
-            vkAudioModel[i].visibleImageCancel = value
-    }
 
     width: 800
     height: 1280
@@ -93,13 +70,13 @@ Item {
                     }
             }
             else for(var prev = vkAudioModel.length - 1; prev >= 0; prev--)
-                if(vkAudioModel[prev].idTrack === id)
-                {
-                    listView.currentIndex = prev
-                    listView.model.index = prev
-                    listView.displayMarginBeginning = prev
-                    break
-                }
+                    if(vkAudioModel[prev].idTrack === id)
+                    {
+                        listView.currentIndex = prev
+                        listView.model.index = prev
+                        listView.displayMarginBeginning = prev
+                        break
+                    }
         }
         onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
     }
@@ -231,9 +208,9 @@ Item {
                     id: clickedFriend
                     anchors.fill: avatarWindow
                     onClicked: {
+                        fastBlurRadius = 5
                         listFriend.visible = true
                         inputSearchFriend.focus = true
-                        fastBlurRadius = 5
                     }
                 }
 
@@ -791,7 +768,7 @@ Item {
                             vkAudioModel[index].visibleColorRemove = true
                             vkAudioModel[index].visibleImageAdd = true
                             vkAudioModel[index].visibleColorItem = true
-                            item.removeTrack(vkAudioModel[index].idTrack, connectVkAudio.getIdAvatarMy(), false)
+                            item.removeTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser, false)
                         }
                     }
                 }
@@ -836,10 +813,11 @@ Item {
                         id: clickedOkAddTrack
                         anchors.fill: okAddTrack
                         onReleased: {
+                            console.debug(indexFriend)
                             var index = model.index
                             if(indexFriend != -1)
                             {
-                                item.addTrack(vkAudioModel[index].idTrack, vkFriendModel[indexFriend].idFriend)
+                                item.addTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser)
                                 vkAudioModel[index].visibleColorAdd = true
                                 okAddTrack.enabled = false
                             }
@@ -850,7 +828,7 @@ Item {
                                 vkAudioModel[index].visibleColorItem = false
                                 vkAudioModel[index].enableMouse = true
                                 cancelRemoveTrack.enabled = true
-                                item.removeTrack(vkAudioModel[index].idTrack, connectVkAudio.getIdAvatarMy(), true)
+                                item.removeTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser, true)
                             }
                         }
                     }
@@ -925,7 +903,7 @@ Item {
                 }
             }
             onMovementEnded: {
-                var index = currentMidFriend(currentIndex)
+                var index = Script.currentMidFriend(currentIndex)
                 inputSearchFriend.text = vkFriendModel[index].nameFriend
             }
             delegate: Rectangle {
@@ -962,7 +940,7 @@ Item {
             MouseArea {
                 anchors.fill: pathView
                 onClicked: {
-                    var index = currentMidFriend(pathView.currentIndex)
+                    var index = Script.currentMidFriend(pathView.currentIndex)
                     inputSearchFriend.text = vkFriendModel[index].nameFriend
                 }
             }
@@ -1033,17 +1011,17 @@ Item {
                             {
                                 avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
                                 item.selectPlaylistMy()
-                                setVisibleAdd(false)
-                                setVisibleCancel(true)
+                                Script.setVisibleAdd(false)
+                                Script.setVisibleCancel(true)
                                 indexFriend = -1
                                 return
                             }
-                            indexFriend = currentMidFriend(pathView.currentIndex)
+                            indexFriend = Script.currentMidFriend(pathView.currentIndex)
                             avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[indexFriend].idFriend
                             inputSearchFriend.text = ""
                             item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
-                            setVisibleAdd(true)
-                            setVisibleCancel(false)
+                            Script.setVisibleAdd(true)
+                            Script.setVisibleCancel(false)
                         }
                     }
                 }
@@ -1087,7 +1065,7 @@ Item {
                             var input = text.toLowerCase()
                             if(indefinite.search(input) == -1)
                                 if(friend.search(input) !== -1)
-                                    pathView.currentIndex = currentMidFriend(i);
+                                    pathView.currentIndex = Script.currentMidFriend(i);
                         }
                     }
                 }
@@ -1125,15 +1103,21 @@ Item {
                 font.pixelSize: 25
                 placeholderText: "search"
                 onEditingFinished: {
-                    if(text.length == 0)
+                    if(text.length != 0)
                     {
-                        if(indexFriend == -1)
+                        item.returnPressedGlobalSearch(text)
+                        Script.setVisibleAdd(true)
+                        Script.setVisibleCancel(false)
+                        indexFriend = -2
+                        item.deleteTrack()
+                    }
+                    else
+                    {
+                        if(indexFriend == -1 || indexFriend == -2)
                             item.selectPlaylistMy()
                         else
                             item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
-                        return
                     }
-                    item.returnPressedGlobalSearch(text)
                 }
                 style: styleTextField
             }

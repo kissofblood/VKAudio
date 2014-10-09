@@ -3,11 +3,12 @@
 PropertyModelAudio::PropertyModelAudio(QObject* parent) : QObject(parent)
 { }
 
-PropertyModelAudio::PropertyModelAudio(const QString& artist, const QString& title, const QString& duration, const QString& id, QObject* parent) : QObject(parent)
+PropertyModelAudio::PropertyModelAudio(const QString& artist, const QString& title, const QString& duration, const QString& idTrack, const QString& idUser, QObject* parent) : QObject(parent)
     , m_artist(artist)
     , m_title(title)
     , m_duration(duration)
-    , m_idTrack(id)
+    , m_idTrack(idTrack)
+    , m_idUser(idUser)
 { }
 
 QString PropertyModelAudio::artist() const
@@ -55,6 +56,18 @@ void PropertyModelAudio::setIdTrack(const QString& idTrack)
     {
         m_idTrack = idTrack;
         emit idTrackChanged();
+    }
+}
+
+QString PropertyModelAudio::idUser() const
+{ return m_idUser; }
+
+void PropertyModelAudio::setIdUser(const QString& idUser)
+{
+    if(idUser != m_idUser)
+    {
+        m_idUser = idUser;
+        emit idUserChanged();
     }
 }
 

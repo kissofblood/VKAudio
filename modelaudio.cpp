@@ -13,29 +13,28 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
     while(!nodeAudio.isNull())
     {
         QDomNode nodeInfoTrack = nodeAudio.toElement().firstChild();
-        IdTrack id;
-        Artist artist;
-        Title title;
-        Duration duration;
-        QUrl url;
+        InfoTrack infoTrack;
+        IdTrack idTrack;
         while(!nodeInfoTrack.isNull())
         {
             QDomElement element = nodeInfoTrack.toElement();
             if(element.tagName() == "id")
-                id = element.text();
+                idTrack = element.text();
             else if(element.tagName() == "artist")
-                artist = element.text();
+                infoTrack.artist = element.text();
             else if(element.tagName() == "title")
-                title = element.text();
+                infoTrack.title = element.text();
             else if(element.tagName() == "duration")
-                duration = element.text().toInt();
+                infoTrack.duration = element.text().toInt();
             else if(element.tagName() == "url")
-                url = QUrl(element.text());
+                infoTrack.url = QUrl(element.text());
+            else if(element.tagName() == "owner_id")
+                infoTrack.ownerId = element.text();
             nodeInfoTrack = nodeInfoTrack.nextSibling();
         }
 
-        m_vecInfoTrack_.push_back(qMakePair(StateTrack::Show, std::make_tuple(artist, title, duration, url)));
-        m_hashInfoTrack_.insert(id, m_vecInfoTrack_.end() - 1);
+        m_vecInfoTrack_.push_back(qMakePair(StateTrack::Show, infoTrack));
+        m_hashInfoTrack_.insert(idTrack, m_vecInfoTrack_.end() - 1);
 
         nodeAudio = nodeAudio.nextSibling();
     }
@@ -166,7 +165,7 @@ QUrl ModelAudio::makeWorkUrl(const QString& url)
 }
 
 QUrl ModelAudio::findUrlTrack(const QString& id)
-{ return std::get<3>(m_hashInfoTrack_[id]->second); }
+{ return m_hashInfoTrack_[id]->second.url; }
 
 QString ModelAudio::getNextIdTrack(const QString& id)
 {
@@ -238,7 +237,6 @@ void ModelAudio::findPlaylist(const QString& token)
 
 void ModelAudio::globalSearchAudio(const QString& artist)
 {
-    QNetworkAccessManager* loadGlobalAudio = new QNetworkAccessManager(this);
     m_vecInfoTrack_.clear();
     m_hashInfoTrack_.clear();
     QUrlQuery query("https://api.vk.com/method/audio.search.xml");
@@ -249,6 +247,7 @@ void ModelAudio::globalSearchAudio(const QString& artist)
     query.addQueryItem("access_token", m_token);
 
     QEventLoop loop;
+    QNetworkAccessManager* loadGlobalAudio = new QNetworkAccessManager(this);
     QNetworkReply* reply = loadGlobalAudio->get(QNetworkRequest(makeWorkUrl(query.toString())));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
@@ -270,15 +269,12 @@ void ModelAudio::removeObserver(Observer::AbstractObserver* observer)
 
 void ModelAudio::notifyAudioObservers()
 {
-    QVector<std::tuple<IdTrack, Artist, Title, Duration>> infoTrack;
+    QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>> infoTrack;
     for(auto i = m_vecInfoTrack_.begin(); i != m_vecInfoTrack_.end(); i++)
     {
         IdTrack id = m_hashInfoTrack_.key(i);
-        Artist artist;
-        Title title;
-        Duration duration;
-        std::tie(artist, title, duration, std::ignore) = i->second;
-        infoTrack.push_back(std::make_tuple(id, artist, title, duration));
+        InfoTrack& track = i->second;
+        infoTrack.push_back(std::make_tuple(id, track.artist, track.title, track.duration, track.ownerId));
     }
     std::for_each(m_observer_.begin(), m_observer_.end(), std::bind(&Observer::AbstractObserver::updatePlaylist, std::placeholders::_1, infoTrack));
 }
@@ -296,7 +292,6 @@ void ModelAudio::getPlaylistMy()
 
 void ModelAudio::getPlaylistFriend(const QString& id)
 {
-    QNetworkAccessManager* loadAudio = new QNetworkAccessManager(this);
     m_vecInfoTrack_.clear();
     m_hashInfoTrack_.clear();
     QUrlQuery queryAudio("https://api.vk.com/method/audio.get.xml");
@@ -305,6 +300,7 @@ void ModelAudio::getPlaylistFriend(const QString& id)
     queryAudio.addQueryItem("access_token", m_token);
 
     QEventLoop loop;
+    QNetworkAccessManager* loadAudio = new QNetworkAccessManager(this);
     QNetworkReply* reply = loadAudio->get(QNetworkRequest(makeWorkUrl(queryAudio.toString())));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
@@ -359,7 +355,7 @@ void ModelAudio::uploadServerTrack(QFile* data)
     multipart->append (filePart);
 */
 
-     QHttpMultiPart* multipart = new QHttpMultiPart (QHttpMultiPart::FormDataType);
+     /*QHttpMultiPart* multipart = new QHttpMultiPart (QHttpMultiPart::FormDataType);
 
          QHttpPart filePart;
 
@@ -375,7 +371,7 @@ void ModelAudio::uploadServerTrack(QFile* data)
     this->connect(manager, &QNetworkAccessManager::finished, [](QNetworkReply* reply)
     {
        qDebug()<<reply->readAll();
-    });
+    });*/
 
 
 }
