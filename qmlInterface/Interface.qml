@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
+import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
@@ -16,7 +17,7 @@ Item {
     property bool isRandom: false
     property string indefinite: "indefinite"
     property real fastBlurRadius: -1
-    property real indexFriend: -1
+    property bool friendAudio: false
 
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
@@ -30,12 +31,14 @@ Item {
     signal selectPlaylistFriend(string id)
     signal selectPlaylistMy()
     signal clickedDownloadTrack(string name)
-    signal returnPressedSearch(string search)
-    signal returnPressedGlobalSearch(string search)
+    signal returnPressedSearchTrack(string search)
+    signal returnPressedGlobalSearchTrack(string search)
     signal addTrack(string trackId, string userId)
     signal removeTrack(string trackId, string userId, bool remover)
     signal deleteTrack();
     signal uploadTrack();
+    signal returnPressedSearchFriend(string text)
+    signal recommendedPlaylist(string idUser)
 
     width: 800
     height: 1280
@@ -201,7 +204,7 @@ Item {
                     width: avatarWindow.width - 2
                     height: avatarWindow.height - 2
                     anchors.centerIn: avatarWindow
-                    source: "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
+                    source: connectVkAudio.getUrlAvatarMy()
                 }
 
                 MouseArea {
@@ -594,7 +597,7 @@ Item {
         height: 40
         font.pixelSize: 25
         placeholderText: "search"
-        onEditingFinished: item.returnPressedSearch(text)
+        onEditingFinished: item.returnPressedSearchTrack(text)
         style: styleTextField
 
         FastBlur {
@@ -813,9 +816,8 @@ Item {
                         id: clickedOkAddTrack
                         anchors.fill: okAddTrack
                         onReleased: {
-                            console.debug(indexFriend)
                             var index = model.index
-                            if(indexFriend != -1)
+                            if(friendAudio)
                             {
                                 item.addTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser)
                                 vkAudioModel[index].visibleColorAdd = true
@@ -921,7 +923,7 @@ Item {
                     source: {
                         if(idFriend == indefinite)
                             currentAvatarFriend.visible = false
-                        return "image://avatarFriend/" + idFriend
+                        return urlAvatar
                     }
                     anchors.centerIn: currentAvatarFriend
                     width: {
@@ -959,7 +961,7 @@ Item {
                 anchors.centerIn: avatarMy
                 width: avatarMy.width - 2
                 height: avatarMy.height - 2
-                source: "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
+                source: connectVkAudio.getUrlAvatarMy()
             }
 
             MouseArea {
@@ -1006,22 +1008,22 @@ Item {
                             listFriend.visible = false
                             fastBlurRadius = -1
                             item.deleteTrack()
-                            if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy()
-                                    .substring(0, inputSearchFriend.maximumLength))
+                            if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy().substring(0, inputSearchFriend.maximumLength))
                             {
-                                avatarWindowImage.source = "image://avatarMy/" + connectVkAudio.getIdAvatarMy()
+                                avatarWindowImage.source = connectVkAudio.getUrlAvatarMy()
                                 item.selectPlaylistMy()
                                 Script.setVisibleAdd(false)
                                 Script.setVisibleCancel(true)
-                                indexFriend = -1
+                                friendAudio = false
                                 return
                             }
-                            indexFriend = Script.currentMidFriend(pathView.currentIndex)
-                            avatarWindowImage.source = "image://avatarFriend/" + vkFriendModel[indexFriend].idFriend
+                            var index = Script.currentMidFriend(pathView.currentIndex)
+                            avatarWindowImage.source = vkFriendModel[index].urlAvatar
                             inputSearchFriend.text = ""
-                            item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
+                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)
                             Script.setVisibleAdd(true)
                             Script.setVisibleCancel(false)
+                            friendAudio = true
                         }
                     }
                 }
@@ -1058,16 +1060,7 @@ Item {
                     placeholderText: "search"
                     style: styleTextField
                     maximumLength: 11
-                    onEditingFinished: {
-                        for(var i = 0; i < vkFriendModel.length; i++)
-                        {
-                            var friend = vkFriendModel[i].nameFriend.toLowerCase()
-                            var input = text.toLowerCase()
-                            if(indefinite.search(input) == -1)
-                                if(friend.search(input) !== -1)
-                                    pathView.currentIndex = Script.currentMidFriend(i);
-                        }
-                    }
+                    onEditingFinished: item.returnPressedSearchFriend(text)
                 }
             }
         }
@@ -1105,18 +1098,20 @@ Item {
                 onEditingFinished: {
                     if(text.length != 0)
                     {
-                        item.returnPressedGlobalSearch(text)
+                        item.returnPressedGlobalSearchTrack(text)
                         Script.setVisibleAdd(true)
                         Script.setVisibleCancel(false)
-                        indexFriend = -2
                         item.deleteTrack()
                     }
                     else
                     {
-                        if(indexFriend == -1 || indexFriend == -2)
+                        if(!friendAudio)
                             item.selectPlaylistMy()
                         else
-                            item.selectPlaylistFriend(vkFriendModel[indexFriend].idFriend)
+                        {
+                            var index = Script.currentMidFriend(pathView.currentIndex)
+                            item.selectPlaylistFriend(vkFriendModel[index].idFriend)
+                        }
                     }
                 }
                 style: styleTextField
@@ -1124,17 +1119,43 @@ Item {
 
             ScrollView {
                 anchors.top: globalSearchTrack.bottom
+                anchors.topMargin: 5
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.maximumWidth: rightPanel.width - 12
+                Layout.maximumWidth: rightPanel.width - 9
                 Layout.minimumHeight: rightPanel.height - globalSearchTrack.height
                 flickableItem.interactive: true
                 style: scrollViewHandle
 
                 Rectangle {
-                    color: "red"
-                    width: 20
-                    height: 900
+                    id: recommendedRec
+                    color: clickedRecommended.pressed ? "#222" : "black"
+                    width: rightPanel.width - 22
+                    height: 40
+                    border.width: 2
+                    border.color: "#33b5e5"
+                    radius: 6
+
+                    Text {
+                        anchors.centerIn: recommendedRec
+                        text: "Рекомендация"
+                        font.pixelSize: 20
+                        color: "white"
+                    }
+
+                    MouseArea {
+                        id: clickedRecommended
+                        anchors.fill: recommendedRec
+                        onReleased: {
+                            if(!friendAudio)
+                                item.recommendedPlaylist(connectVkAudio.getIdMy())
+                            else
+                            {
+                                var index = Script.currentMidFriend(pathView.currentIndex)
+                                item.recommendedPlaylist(vkFriendModel[index].idFriend)
+                            }
+                        }
+                    }
                 }
             }
         }

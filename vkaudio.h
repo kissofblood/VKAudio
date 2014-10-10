@@ -3,7 +3,6 @@
 
 #include "propertymodelaudio.h"
 #include "propertymodelfriend.h"
-#include "avatarprovider.h"
 #include "observer.h"
 #include "modelaudio.h"
 #include <QWidget>
@@ -45,7 +44,7 @@ public:
     explicit VkAudio(QWidget* parent = nullptr);
     ~VkAudio() override;
 
-    void updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend) override;
+    void updateListFriend(const QVector<std::tuple<IdUser, QString, QUrl>>& listFriend) override;
     void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>>& infoTrack) override;
 
 signals:
@@ -69,9 +68,11 @@ private slots:
     void pushRemoveTrack(const QString& trackId, const QString& userId, bool remove);
     void deleteAllTrack();
     void openFileForUpload();
+    void filterFriend(const QString& text);
 
 protected:
-    Q_INVOKABLE QString getIdAvatarMy() const;
+    Q_INVOKABLE QUrl getUrlAvatarMy() const;
+    Q_INVOKABLE QString getIdMy() const;
     Q_INVOKABLE QString getNameAvatarMy() const;
 
 private:
@@ -81,8 +82,6 @@ private:
     ModelAudio      *m_modelAudio               = new ModelAudio(this);
     QBuffer         *m_bufferTrack              = new QBuffer(this);
     QMediaPlayer    *m_player                   = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
-    AvatarProvider  *m_avatarFriend             = nullptr;
-    AvatarProvider  *m_avatarMy                 = nullptr;
     QList<QObject*> m_propertyModelAudio_;
     QList<QObject*> m_propertyModelFriend_;
     QHash<QString, QString> m_deleteTrack_;

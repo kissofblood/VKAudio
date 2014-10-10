@@ -3,9 +3,10 @@
 PropertyModelFriend::PropertyModelFriend(QObject* parent) : QObject(parent)
 { }
 
-PropertyModelFriend::PropertyModelFriend(const QString& name, const QString& id, QObject* parent) : QObject(parent)
+PropertyModelFriend::PropertyModelFriend(const QString& name, const QString& id, const QUrl& url, QObject* parent) : QObject(parent)
     , m_name(name)
     , m_id(id)
+    , m_urlAvatar(url)
 { }
 
 QString PropertyModelFriend::nameFriend() const
@@ -29,5 +30,17 @@ void PropertyModelFriend::setIdFriend(const QString& id)
     {
         m_id = id;
         emit idFriendChanged();
+    }
+}
+
+QUrl PropertyModelFriend::urlAvatar() const
+{ return m_urlAvatar; }
+
+void PropertyModelFriend::setUrlAvatar(const QUrl& url)
+{
+    if(url != m_urlAvatar)
+    {
+        m_urlAvatar = url;
+        emit urlAvatarChanged();
     }
 }

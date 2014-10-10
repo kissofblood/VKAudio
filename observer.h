@@ -3,7 +3,7 @@
 
 #include <QVector>
 #include <QString>
-#include <QPixmap>
+#include <QUrl>
 #include <tuple>
 
 using IdUser    = QString;
@@ -20,7 +20,7 @@ public:
     AbstractObserver() = default;
     virtual ~AbstractObserver() = default;
 
-    virtual void updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend) = 0;
+    virtual void updateListFriend(const QVector<std::tuple<IdUser, QString, QUrl>>& listFriend) = 0;
     virtual void updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>>& infoTrack) = 0;
 };
 

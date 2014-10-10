@@ -16,16 +16,14 @@ SOURCES += main.cpp\
     modelaudio.cpp \
     vkaudio.cpp \
     propertymodelaudio.cpp \
-    propertymodelfriend.cpp \
-    avatarprovider.cpp
+    propertymodelfriend.cpp
 
 HEADERS  += widget.h \
     observer.h \
     modelaudio.h \
     vkaudio.h \
     propertymodelaudio.h \
-    propertymodelfriend.h \
-    avatarprovider.h
+    propertymodelfriend.h
 
 RESOURCES += \
     resources.qrc

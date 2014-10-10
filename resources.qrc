@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>qmlInterface/setFunction.js</file>
-        <file>qmlInterface/interface.qml</file>
+        <file>qmlInterface/Interface.qml</file>
     </qresource>
     <qresource prefix="/icon">
         <file>icon/player_fwd.png</file>

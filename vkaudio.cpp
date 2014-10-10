@@ -2,11 +2,11 @@
 
 VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 {
-    m_quickView->setSource(QUrl("qrc:/qmlInterface/interface.qml"));
+    m_quickView->setSource(QUrl("qrc:/qmlInterface/Interface.qml"));
     m_quickView->setResizeMode(QQuickView::SizeRootObjectToView);
     m_authorization->load(QUrl("https://oauth.vk.com/authorize?"
                                "client_id=4290375"
-                               "&scope=ofline"
+                               "&scope=audio,friends,photos"
                                "&redirect_uri=https://oauth.vk.com/blank.html"
                                "&display=mobile"
                                "&v=5.24"
@@ -44,14 +44,16 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
     this->connect(item, SIGNAL(selectRandomTrack(bool)),    SLOT(setRandomTrack(bool)));
     this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
-    this->connect(item, SIGNAL(returnPressedSearch(QString)),     SLOT(filterTrack(QString)));
+    this->connect(item, SIGNAL(returnPressedSearchTrack(QString)),     SLOT(filterTrack(QString)));
     this->connect(item, SIGNAL(selectPlaylistFriend(QString)),    m_modelAudio, SLOT(getPlaylistFriend(QString)));
     this->connect(item, SIGNAL(selectPlaylistMy()), m_modelAudio, SLOT(getPlaylistMy()));
     this->connect(item, SIGNAL(addTrack(QString, QString)), m_modelAudio, SLOT(addTrack(QString, QString)));
-    this->connect(item, SIGNAL(returnPressedGlobalSearch(QString)), m_modelAudio, SLOT(globalSearchAudio(QString)));
+    this->connect(item, SIGNAL(returnPressedGlobalSearchTrack(QString)), m_modelAudio, SLOT(globalSearchAudio(QString)));
     this->connect(item, SIGNAL(removeTrack(QString, QString, bool)), SLOT(pushRemoveTrack(QString, QString, bool)));
     this->connect(item, SIGNAL(deleteTrack()), SLOT(deleteAllTrack()));
     this->connect(item, SIGNAL(uploadTrack()), SLOT(openFileForUpload()));
+    this->connect(item, SIGNAL(returnPressedSearchFriend(QString)), SLOT(filterFriend(QString)));
+    this->connect(item, SIGNAL(recommendedPlaylist(QString)), m_modelAudio, SLOT(getRecommended(QString)));
 
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
@@ -62,48 +64,31 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
 }
 
 VkAudio::~VkAudio()
-{
-    delete m_quickView;
-    delete m_avatarFriend;
-    delete m_avatarMy;
-}
+{ delete m_quickView; }
 
-void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QPixmap>>& listFriend)
+void VkAudio::updateListFriend(const QVector<std::tuple<IdUser, QString, QUrl>>& listFriend)
 {
     std::for_each(m_propertyModelFriend_.begin(), m_propertyModelFriend_.end(), std::bind(&QObject::deleteLater, std::placeholders::_1));
     m_propertyModelFriend_.clear();
-    delete m_avatarFriend;  m_avatarFriend = nullptr;
-    delete m_avatarMy;      m_avatarMy = nullptr;
 
     IdUser id;
     QString name;
-    QPixmap pix;
-    QHash<QString, QPixmap> avatart;
+    QUrl url;
     for(auto& info : listFriend)
     {
-        std::tie(id, name, pix) = info;
-        m_propertyModelFriend_.push_back(new PropertyModelFriend(name, id, this));
-        avatart.insert(id, pix);
+        std::tie(id, name, url) = info;
+        m_propertyModelFriend_.push_back(new PropertyModelFriend(name, id, url, this));
     }
     if(m_propertyModelFriend_.size() % 2 != 0)
     {
         id = "indefinite";
         name = "indefinite";
-        pix = QPixmap(100, 100);
-        pix.fill(QColor(Qt::white));
-        m_propertyModelFriend_.push_back(new PropertyModelFriend(name, id, this));
-        avatart.insert(id, pix);
+        url = QUrl();
+        m_propertyModelFriend_.push_back(new PropertyModelFriend(name, id, url, this));
     }
-
-    std::tie(id, name, pix) = m_modelAudio->getInfoMy();
-    m_avatarMy = new AvatarProvider({{ id, pix }});
-    m_quickView->engine()->addImageProvider("avatarMy", m_avatarMy);
 
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkFriendModel", QVariant::fromValue(m_propertyModelFriend_));
-
-    m_avatarFriend = new AvatarProvider(avatart);
-    m_quickView->engine()->addImageProvider("avatarFriend", m_avatarFriend);
 }
 
 void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Duration, IdUser>>& infoTrack)
@@ -126,7 +111,10 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
     context->setContextProperty("vkAudioModel", QVariant::fromValue(m_propertyModelAudio_));
 }
 
-QString VkAudio::getIdAvatarMy() const
+QUrl VkAudio::getUrlAvatarMy() const
+{ return std::get<2>(m_modelAudio->getInfoMy()); }
+
+QString VkAudio::getIdMy() const
 { return std::get<0>(m_modelAudio->getInfoMy()); }
 
 QString VkAudio::getNameAvatarMy() const
@@ -259,4 +247,17 @@ void VkAudio::openFileForUpload()
     QFile* fileOpen = new QFile(pathFile);
     if(fileOpen->open(QIODevice::ReadOnly))
         m_modelAudio->uploadServerTrack(fileOpen);
+}
+
+void VkAudio::filterFriend(const QString& text)
+{
+    QList<QObject*> result;
+    for(QObject* objectModel : m_propertyModelFriend_)
+    {
+        PropertyModelFriend* propertyModel = qobject_cast<PropertyModelFriend*>(objectModel);
+        if(propertyModel->nameFriend().contains(text, Qt::CaseInsensitive))
+            result.push_back(objectModel);
+    }
+    QQmlContext* context = m_quickView->rootContext();
+    context->setContextProperty("vkFriendModel", QVariant::fromValue(result));
 }

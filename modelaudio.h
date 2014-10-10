@@ -48,7 +48,7 @@ public:
     QString getNextIdTrack(const QString& id);
     QString getPrevIdTrack(const QString& id);
     QString getRandomIdTrack();
-    std::tuple<IdUser, QString, QPixmap> getInfoMy() const;
+    std::tuple<IdUser, QString, QUrl> getInfoMy() const;
     void setStateTrack(const QString& id, StateTrack state);
     void findPlaylist(const QString& token);
     void registerObserver(Observer::AbstractObserver* observer) override;
@@ -66,6 +66,7 @@ public slots:
     void getPlaylistFriend(const QString& id);
     void addTrack(const QString& trackId, const QString& userId);
     void globalSearchAudio(const QString& artist);
+    void getRecommended(const QString& idUser);
 
 private slots:
     void parserAudio(QNetworkReply* reply);
@@ -76,12 +77,12 @@ private:
     QVector<Observer::AbstractObserver*>            m_observer_;
     QVector<QPair<StateTrack, InfoTrack>>           m_vecInfoTrack_;
     QHash<IdTrack, QVector<QPair<StateTrack, InfoTrack>>::iterator> m_hashInfoTrack_;
-    QHash<IdUser, QPair<QString, QPixmap>> m_infoFriend_;
-    QPair<IdUser, QPair<QString, QPixmap>> m_infoMy;
+    QHash<IdUser, QPair<QString, QUrl>> m_infoFriend_;
+    QPair<IdUser, QPair<QString, QUrl>> m_infoMy;
     QString m_token;
     int     m_countFriend = 0;
 
-    QPair<IdUser, QPair<QString, QPixmap>> getResultParserUser(const QByteArray& array);
+    QPair<IdUser, QPair<QString, QUrl>> getResultParserUser(const QByteArray& array);
     QUrl makeWorkUrl(const QString& url);
 };
 
