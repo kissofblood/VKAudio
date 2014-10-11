@@ -12,12 +12,3 @@ function currentMidFriend(currentIndex) {
     return currentIndexMid - pathView.count
 }
 
-function setVisibleAdd(value) {
-    for(var i = 0; i < vkAudioModel.length; i++)
-        vkAudioModel[i].visibleImageAdd = value
-}
-
-function setVisibleCancel(value) {
-    for(var i = 0; i < vkAudioModel.length; i++)
-        vkAudioModel[i].visibleImageCancel = value
-}

@@ -57,22 +57,21 @@ public:
     void notifyFriendObservers() override;
     void deleteTrack(const QString& trackId, const QString& userId);
     void uploadServerTrack(QFile* data);
+    void getPlaylistMy();
+    void getPlaylistFriend(const QString& id);
+    void globalSearchAudio(const QString& artist);
+    void getRecommended(const QString& idUser);
+    void getPopular(const QString& id);
 
 signals:
     void progressDownload(qint64 value);
 
 public slots:
-    void getPlaylistMy();
-    void getPlaylistFriend(const QString& id);
     void addTrack(const QString& trackId, const QString& userId);
-    void globalSearchAudio(const QString& artist);
-    void getRecommended(const QString& idUser);
-    void getPopular(const QString& id);
 
 private slots:
     void parserAudio(QNetworkReply* reply);
     void parserFriend(QNetworkReply* reply);
-    void parserUser(QNetworkReply* reply);
 
 private:
     QVector<Observer::AbstractObserver*>            m_observer_;
@@ -81,9 +80,7 @@ private:
     QHash<IdUser, QPair<QString, QUrl>> m_infoFriend_;
     QPair<IdUser, QPair<QString, QUrl>> m_infoMy;
     QString m_token;
-    int     m_countFriend = 0;
 
-    QPair<IdUser, QPair<QString, QUrl>> getResultParserUser(const QByteArray& array);
     QUrl makeWorkUrl(const QString& url);
 };
 

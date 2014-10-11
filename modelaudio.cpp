@@ -52,16 +52,33 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
 
 void ModelAudio::parserFriend(QNetworkReply* reply)
 {
-    m_countFriend = 0;
-    QStringList idFriend;
-    QStringList resutlFriend;
+    m_infoFriend_.clear();
+
     QDomDocument doc;
     doc.setContent(reply->readAll());
-    QDomNode myFriend = doc.documentElement().firstChild().nextSibling().firstChild();
-    while(!myFriend.isNull())
+    QDomNode nodeFriend = doc.documentElement().firstChild().nextSibling().firstChild();
+    while(!nodeFriend.isNull())
     {
-        idFriend.push_back(myFriend.toElement().text());
-        myFriend = myFriend.nextSibling();
+        IdUser id;
+        QString name;
+        QUrl photo;
+        QDomNode nodeFriendChild = nodeFriend.toElement().firstChild();
+        while(!nodeFriendChild.isNull())
+        {
+            QDomElement element = nodeFriendChild.toElement();
+            if(element.tagName() == "id")
+                id = element.text();
+            else if(element.tagName() == "first_name")
+                name = element.text() + " ";
+            else if(element.tagName() == "last_name")
+                name += element.text();
+            else if(element.tagName() == "photo_100")
+                photo = element.text();
+            nodeFriendChild = nodeFriendChild.nextSibling();
+        }
+        m_infoFriend_.insert(id, qMakePair(name, photo));
+
+        nodeFriend = nodeFriend.nextSibling();
     }
 
     QUrlQuery queryUserMy("https://api.vk.com/method/users.get.xml");
@@ -70,88 +87,36 @@ void ModelAudio::parserFriend(QNetworkReply* reply)
     queryUserMy.addQueryItem("access_token", m_token);
 
     QNetworkAccessManager* loadUserMy = new QNetworkAccessManager(this);
-
     QEventLoop loopMy;
     QNetworkReply* replyMy = loadUserMy->get(QNetworkRequest(makeWorkUrl(queryUserMy.toString())));
     this->connect(replyMy, &QNetworkReply::finished, &loopMy, &QEventLoop::quit);
-    //this->connect(replyMy, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
-      //  std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(loadUserMy, &QNetworkAccessManager::finished, [this](QNetworkReply* reply)
-    { m_infoMy = getResultParserUser(reply->readAll()); });
+    {
+        QDomDocument doc;
+        doc.setContent(reply->readAll());
+        QDomNode node = doc.documentElement().firstChild().toElement().firstChild();
+        IdUser id;
+        QString name;
+        QUrl photo;
+        while(!node.isNull())
+        {
+            QDomElement element = node.toElement();
+            if(element.tagName() == "id")
+                id = element.text();
+            else if(element.tagName() == "first_name")
+                name = element.text() + " ";
+            else if(element.tagName() == "last_name")
+                name += element.text();
+            else if(element.tagName() == "photo_100")
+                photo = element.text();
+            node = node.nextSibling();
+        }
+        m_infoMy = qMakePair(id, qMakePair(name, photo));
+    });
     this->connect(replyMy, &QNetworkReply::finished, loadUserMy, &QNetworkAccessManager::deleteLater);
     loopMy.exec();
 
-    for(QString& id : idFriend)
-    {
-        QUrlQuery queryUserFriend("https://api.vk.com/method/users.get.xml");
-        queryUserFriend.addQueryItem("user_ids", id);
-        queryUserFriend.addQueryItem("fields", "photo_100");
-        queryUserFriend.addQueryItem("v", "5.24");
-        queryUserFriend.addQueryItem("access_token", m_token);
-        resutlFriend.push_back(queryUserFriend.toString());
-    }
-
-    for(QString& url : resutlFriend)
-        for(int i = 0; i < url.length(); i++)
-            if(url[i] == '&')
-            {
-                url.replace(i, 1, '?');
-                break;
-            }
-
-    m_countFriend = resutlFriend.size();
-    for(QString& url : resutlFriend)
-    {
-        QEventLoop sleep;
-        QTimer::singleShot(220, &sleep, SLOT(quit()));
-        sleep.exec();
-
-        QNetworkAccessManager* loadUserFriend = new QNetworkAccessManager(this);
-
-        QEventLoop loopFriend;
-        QNetworkReply* replyFriend = loadUserFriend->get(QNetworkRequest(url));
-        this->connect(replyFriend, &QNetworkReply::finished, &loopFriend, &QEventLoop::quit);
-        //this->connect(replyFriend, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
-          //  std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
-        this->connect(loadUserFriend, &QNetworkAccessManager::finished, this, &ModelAudio::parserUser);
-        this->connect(replyFriend, &QNetworkReply::finished, loadUserFriend, &QNetworkAccessManager::deleteLater);
-        loopFriend.exec();
-    }
-}
-
-void ModelAudio::parserUser(QNetworkReply* reply)
-{
-    auto result = getResultParserUser(reply->readAll());
-    m_infoFriend_.insert(result.first, qMakePair(result.second.first, result.second.second));
-
-    qDebug()<<m_infoFriend_.size()<<"\t"<<m_countFriend<<"asdf";
-    if(m_countFriend == m_infoFriend_.size())
-        notifyFriendObservers();
-}
-
-QPair<IdUser, QPair<QString, QUrl>> ModelAudio::getResultParserUser(const QByteArray& array)
-{
-    QDomDocument doc;
-    doc.setContent(array);
-    QDomNode nodeUser = doc.documentElement().firstChild().toElement().firstChild();
-    IdUser id;
-    QString name;
-    QUrl photo;
-    //qDebug()<<doc.toString()<<"\n\nf432432";
-    while(!nodeUser.isNull())
-    {
-        QDomElement element = nodeUser.toElement();
-        if(element.tagName() == "id")
-            id = element.text();
-        else if(element.tagName() == "first_name")
-            name = element.text() + " ";
-        else if(element.tagName() == "last_name")
-            name += element.text();
-        else if(element.tagName() == "photo_100")
-            photo = element.text();
-        nodeUser = nodeUser.nextSibling();
-    }
-    return qMakePair(id, qMakePair(name, photo));
+    notifyFriendObservers();
 }
 
 QUrl ModelAudio::makeWorkUrl(const QString& url)
@@ -224,6 +189,7 @@ void ModelAudio::findPlaylist(const QString& token)
     m_token = token;
 
     QUrlQuery queryFriend("https://api.vk.com/method/friends.get.xml");
+    queryFriend.addQueryItem("fields", "domain,photo_100");
     queryFriend.addQueryItem("v", "5.24");
     queryFriend.addQueryItem("access_token", m_token);
 
@@ -324,15 +290,10 @@ void ModelAudio::getPlaylistFriend(const QString& id)
     queryAudio.addQueryItem("v", "5.24");
     queryAudio.addQueryItem("access_token", m_token);
 
-    QEventLoop loop;
     QNetworkAccessManager* loadAudio = new QNetworkAccessManager(this);
     QNetworkReply* reply = loadAudio->get(QNetworkRequest(makeWorkUrl(queryAudio.toString())));
-    this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
-       // std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(loadAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
     this->connect(reply, &QNetworkReply::finished, loadAudio, &QNetworkAccessManager::deleteLater);
-    loop.exec();
 }
 
 void ModelAudio::addTrack(const QString& trackId, const QString& userId)

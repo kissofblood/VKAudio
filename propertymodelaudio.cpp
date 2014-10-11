@@ -3,13 +3,24 @@
 PropertyModelAudio::PropertyModelAudio(QObject* parent) : QObject(parent)
 { }
 
-PropertyModelAudio::PropertyModelAudio(const QString& artist, const QString& title, const QString& duration, const QString& idTrack, const QString& idUser, QObject* parent) : QObject(parent)
+PropertyModelAudio::PropertyModelAudio(const QString& artist, const QString& title, const QString& duration, const QString& idTrack, const QString& idUser, bool addAndCancel, QObject* parent) : QObject(parent)
     , m_artist(artist)
     , m_title(title)
     , m_duration(duration)
     , m_idTrack(idTrack)
     , m_idUser(idUser)
-{ }
+{
+    if(addAndCancel)
+    {
+        m_visibleImageAdd = false;
+        m_visibleImageCancel = true;
+    }
+    else
+    {
+        m_visibleImageAdd = true;
+        m_visibleImageCancel = false;
+    }
+}
 
 QString PropertyModelAudio::artist() const
 { return m_artist; }

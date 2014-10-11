@@ -43,18 +43,18 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(selectPrevTrack(QString)),   SLOT(setPrevTrack(QString)));
     this->connect(item, SIGNAL(selectLoopTrack(bool)),      SLOT(setLoopTrack(bool)));
     this->connect(item, SIGNAL(selectRandomTrack(bool)),    SLOT(setRandomTrack(bool)));
-    this->connect(item, SIGNAL(clickedDownloadTrack(QString)),    SLOT(downloadTrack(QString)));
-    this->connect(item, SIGNAL(returnPressedSearchTrack(QString)),     SLOT(filterTrack(QString)));
-    this->connect(item, SIGNAL(selectPlaylistFriend(QString)),    m_modelAudio, SLOT(getPlaylistFriend(QString)));
-    this->connect(item, SIGNAL(selectPlaylistMy()), m_modelAudio, SLOT(getPlaylistMy()));
+    this->connect(item, SIGNAL(clickedDownloadTrack(QString)),      SLOT(downloadTrack(QString)));
+    this->connect(item, SIGNAL(returnPressedSearchTrack(QString)),  SLOT(filterTrack(QString)));
+    this->connect(item, SIGNAL(selectPlaylistFriend(QString)),      SLOT(getPlaylistFriendModel(QString)));
+    this->connect(item, SIGNAL(selectPlaylistMy()), SLOT(getPlaylistMyModel()));
     this->connect(item, SIGNAL(addTrack(QString, QString)), m_modelAudio, SLOT(addTrack(QString, QString)));
-    this->connect(item, SIGNAL(returnPressedGlobalSearchTrack(QString)), m_modelAudio, SLOT(globalSearchAudio(QString)));
+    this->connect(item, SIGNAL(returnPressedGlobalSearchTrack(QString)), SLOT(getGlobalSearchAudioModel(QString)));
     this->connect(item, SIGNAL(removeTrack(QString, QString, bool)), SLOT(pushRemoveTrack(QString, QString, bool)));
     this->connect(item, SIGNAL(deleteTrack()), SLOT(deleteAllTrack()));
     this->connect(item, SIGNAL(uploadTrack()), SLOT(openFileForUpload()));
     this->connect(item, SIGNAL(returnPressedSearchFriend(QString)), SLOT(filterFriend(QString)));
-    this->connect(item, SIGNAL(selectPlaylistRecommended(QString)), m_modelAudio, SLOT(getRecommended(QString)));
-    this->connect(item, SIGNAL(selectPlaylistPopular(QString)), m_modelAudio, SLOT(getPopular(QString)));
+    this->connect(item, SIGNAL(selectPlaylistRecommended(QString)), SLOT(getRecommendedModel(QString)));
+    this->connect(item, SIGNAL(selectPlaylistPopular(QString)),     SLOT(getPopularModel(QString)));
 
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
@@ -106,7 +106,7 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
         std::tie(idTrack, artist, title, duration, idUser) = track;
         int durationMsec = duration * 1000;
         QTime durationTime(0, (durationMsec / 60000) % 60, (durationMsec / 1000) % 60);
-        m_propertyModelAudio_.push_back(new PropertyModelAudio(artist, title, durationTime.toString("mm:ss"), idTrack, idUser, this));
+        m_propertyModelAudio_.push_back(new PropertyModelAudio(artist, title, durationTime.toString("mm:ss"), idTrack, idUser, m_addAndCancel, this));
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkAudioModel", QVariant::fromValue(m_propertyModelAudio_));
@@ -135,12 +135,13 @@ void VkAudio::checkUrl(const QUrl& url)
 
 void VkAudio::urlTrack(const QString& id)
 {
-    QNetworkAccessManager* loadTrack = new QNetworkAccessManager(this);
-    QNetworkReply* reply = loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
+    m_loadTrack->deleteLater();
+    m_loadTrack = new QNetworkAccessManager(this);
+    QNetworkReply* reply = m_loadTrack->get(QNetworkRequest(m_modelAudio->findUrlTrack(id)));
 
     this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&VkAudio::progressDownloadTrack, this,
         std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
-    this->connect(loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
+    this->connect(m_loadTrack, &QNetworkAccessManager::finished, this, [this](QNetworkReply* reply)
     {
         m_bufferTrack->close();
         m_bufferTrack->setData(reply->readAll());
@@ -149,7 +150,6 @@ void VkAudio::urlTrack(const QString& id)
         m_player->play();
         QTimer::singleShot(100, this, SIGNAL(progressDownloadTrack()));
     });
-    this->connect(reply, &QNetworkReply::finished, loadTrack, &QNetworkAccessManager::deleteLater);
 }
 
 void VkAudio::setPositionPlayer(int position)
@@ -261,4 +261,34 @@ void VkAudio::filterFriend(const QString& text)
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkFriendModel", QVariant::fromValue(result));*/
+}
+
+void VkAudio::getPlaylistMyModel()
+{
+    m_addAndCancel = true;
+    m_modelAudio->getPlaylistMy();
+}
+
+void VkAudio::getRecommendedModel(const QString& idUser)
+{
+    m_addAndCancel = false;
+    m_modelAudio->getRecommended(idUser);
+}
+
+void VkAudio::getPopularModel(const QString& id)
+{
+    m_addAndCancel = false;
+    m_modelAudio->getPopular(id);
+}
+
+void VkAudio::getGlobalSearchAudioModel(const QString& artist)
+{
+    m_addAndCancel = false;
+    m_modelAudio->globalSearchAudio(artist);
+}
+
+void VkAudio::getPlaylistFriendModel(const QString& idUser)
+{
+    m_addAndCancel = false;
+    m_modelAudio->getPlaylistFriend(idUser);
 }

@@ -20,7 +20,7 @@ class PropertyModelAudio : public QObject
     Q_PROPERTY(bool enableMouse READ enableMouse WRITE setEnableMouse NOTIFY enableMouseChanged)
 public:
     explicit PropertyModelAudio(QObject* parent = nullptr);
-    PropertyModelAudio(const QString& artist, const QString& title, const QString& duration, const QString& idTrack, const QString& idUser, QObject* parent = nullptr);
+    PropertyModelAudio(const QString& artist, const QString& title, const QString& duration, const QString& idTrack, const QString& idUser, bool addAndCancel, QObject* parent = nullptr);
     ~PropertyModelAudio() override = default;
 
     QString artist() const;
@@ -68,9 +68,9 @@ private:
     bool    m_visibleColorAdd       = false;
     bool    m_visibleColorRemove    = false;
     bool    m_visibleColorItem      = false;
-    bool    m_visibleImageAdd       = false;
-    bool    m_visibleImageCancel    = true;
     bool    m_enableMouse           = true;
+    bool    m_visibleImageAdd;
+    bool    m_visibleImageCancel;
 };
 
 #endif // PROPERTYMODELAUDIO_H

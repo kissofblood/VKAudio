@@ -16,7 +16,9 @@ Item {
     property bool isRandom: false
     property string indefinite: "indefinite"
     property real fastBlurRadius: -1
+    property bool addAndCancel: true
     property bool friendAudio: false
+    property bool hideListGenre: false
 
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
@@ -817,13 +819,7 @@ Item {
                         anchors.fill: okAddTrack
                         onReleased: {
                             var index = model.index
-                            if(friendAudio)
-                            {
-                                item.addTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser)
-                                vkAudioModel[index].visibleColorAdd = true
-                                okAddTrack.enabled = false
-                            }
-                            else
+                            if(addAndCancel)
                             {
                                 vkAudioModel[index].visibleColorRemove = false
                                 vkAudioModel[index].visibleImageAdd = false
@@ -831,6 +827,12 @@ Item {
                                 vkAudioModel[index].enableMouse = true
                                 cancelRemoveTrack.enabled = true
                                 item.removeTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser, true)
+                            }
+                            else
+                            {
+                                item.addTrack(vkAudioModel[index].idTrack, vkAudioModel[index].idUser)
+                                vkAudioModel[index].visibleColorAdd = true
+                                okAddTrack.enabled = false
                             }
                         }
                     }
@@ -1006,14 +1008,15 @@ Item {
                         anchors.fill: okSearchFriend
                         onReleased: {
                             listFriend.visible = false
+                            searchTrack.text = ""
+                            globalSearchTrack.text = ""
                             fastBlurRadius = -1
                             item.deleteTrack()
                             if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy().substring(0, inputSearchFriend.maximumLength))
                             {
                                 avatarWindowImage.source = connectVkAudio.getUrlAvatarMy()
                                 item.selectPlaylistMy()
-                                Script.setVisibleAdd(false)
-                                Script.setVisibleCancel(true)
+                                addAndCancel = true
                                 friendAudio = false
                                 return
                             }
@@ -1021,8 +1024,7 @@ Item {
                             avatarWindowImage.source = vkFriendModel[index].urlAvatar
                             inputSearchFriend.text = ""
                             item.selectPlaylistFriend(vkFriendModel[index].idFriend)
-                            Script.setVisibleAdd(true)
-                            Script.setVisibleCancel(false)
+                            addAndCancel = false
                             friendAudio = true
                         }
                     }
@@ -1096,10 +1098,12 @@ Item {
                 font.pixelSize: 25
                 placeholderText: "search"
                 onEditingFinished: {
+                    searchTrack.text = ""
                     if(text.length != 0)
                     {
                         item.returnPressedGlobalSearchTrack(text)
                         item.deleteTrack()
+                        addAndCancel = false
                     }
                     else
                     {
@@ -1121,13 +1125,43 @@ Item {
                 anchors.topMargin: 5
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Layout.maximumWidth: rightPanel.width - 9
+                Layout.maximumWidth: rightPanel.width - 8
                 Layout.minimumHeight: rightPanel.height - globalSearchTrack.height - 5
                 flickableItem.interactive: true
                 style: scrollViewHandle
 
                 ColumnLayout {
                     anchors.fill: scrollViewRightPanel
+
+                    Rectangle {
+                        id: myAudio
+                        color: clickeMyAudio.pressed ? "#222" : "black"
+                        width: rightPanel.width - 22
+                        height: 40
+                        border.width: 2
+                        border.color: "#33b5e5"
+                        radius: 6
+
+                        Text {
+                            anchors.centerIn: myAudio
+                            text: "Мои аудиозаписи"
+                            font.pixelSize: 20
+                            color: "white"
+                        }
+
+                        MouseArea {
+                            id: clickeMyAudio
+                            anchors.fill: myAudio
+                            onReleased: {
+                                addAndCancel = false
+                                friendAudio = false
+                                searchTrack.text = ""
+                                globalSearchTrack.text = ""
+                                item.selectPlaylistMy()
+                                avatarWindowImage.source = connectVkAudio.getUrlAvatarMy()
+                            }
+                        }
+                    }
 
                     Rectangle {
                         id: recommendedRec
@@ -1149,12 +1183,15 @@ Item {
                             id: clickedRecommended
                             anchors.fill: recommendedRec
                             onReleased: {
+                                searchTrack.text = ""
+                                globalSearchTrack.text = ""
+                                addAndCancel = false
                                 if(!friendAudio)
                                     item.selectPlaylistRecommended(connectVkAudio.getIdMy())
                                 else
                                 {
                                     var index = Script.currentMidFriend(pathView.currentIndex)
-                                    item.recommendedPlaylist(vkFriendModel[index].idFriend)
+                                    item.selectPlaylistRecommended(vkFriendModel[index].idFriend)
                                 }
                             }
                         }
@@ -1180,7 +1217,16 @@ Item {
                             id: clickedPopular
                             anchors.fill: popularRect
                             onReleased: {
-                                listGenre.visible = true
+                                if(hideListGenre)
+                                {
+                                    listGenre.visible = false
+                                    hideListGenre = false
+                                }
+                                else
+                                {
+                                    listGenre.visible = true
+                                    hideListGenre = true
+                                }
                             }
                         }
                     }
@@ -1236,6 +1282,9 @@ Item {
                                 id: clikedGenreDelegat
                                 anchors.fill: genreDelegat
                                 onReleased: {
+                                    addAndCancel = false
+                                    searchTrack.text = ""
+                                    globalSearchTrack.text = ""
                                     item.selectPlaylistPopular(genreId)
                                 }
                             }

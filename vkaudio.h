@@ -69,6 +69,11 @@ private slots:
     void deleteAllTrack();
     void openFileForUpload();
     void filterFriend(const QString& text);
+    void getPlaylistMyModel();
+    void getRecommendedModel(const QString& idUser);
+    void getPopularModel(const QString& id);
+    void getGlobalSearchAudioModel(const QString& artist);
+    void getPlaylistFriendModel(const QString& idUser);
 
 protected:
     Q_INVOKABLE QUrl getUrlAvatarMy() const;
@@ -82,11 +87,13 @@ private:
     ModelAudio      *m_modelAudio               = new ModelAudio(this);
     QBuffer         *m_bufferTrack              = new QBuffer(this);
     QMediaPlayer    *m_player                   = new QMediaPlayer(this, QMediaPlayer::StreamPlayback);
+    QNetworkAccessManager   *m_loadTrack        = nullptr;
     QList<QObject*> m_propertyModelAudio_;
     QList<QObject*> m_propertyModelFriend_;
     QHash<QString, QString> m_deleteTrack_;
-    bool m_isRandomTrack = false;
-    bool m_isLoopTrack   = false;
+    bool m_isRandomTrack    = false;
+    bool m_isLoopTrack      = false;
+    bool m_addAndCancel     = true;
 };
 
 #endif // VKAUDIO_H
