@@ -11,8 +11,13 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
     QDomDocument doc;
     doc.setContent(reply->readAll());
     QDomNode nodeAudio = doc.documentElement().firstChild();
-    m_vecInfoTrack_.reserve(nodeAudio.toElement().text().toInt());
-    nodeAudio = doc.documentElement().firstChild().nextSibling().firstChild();
+    if(nodeAudio.toElement().tagName() == "audio") //pupular
+        m_vecInfoTrack_.reserve(1000);
+    else
+    {
+        m_vecInfoTrack_.reserve(nodeAudio.toElement().text().toInt());
+        nodeAudio = nodeAudio.nextSibling().firstChild();
+    }
     while(!nodeAudio.isNull())
     {
         QDomNode nodeInfoTrack = nodeAudio.toElement().firstChild();
@@ -132,7 +137,7 @@ QPair<IdUser, QPair<QString, QUrl>> ModelAudio::getResultParserUser(const QByteA
     IdUser id;
     QString name;
     QUrl photo;
-    qDebug()<<doc.toString()<<"\n\nf432432";
+    //qDebug()<<doc.toString()<<"\n\nf432432";
     while(!nodeUser.isNull())
     {
         QDomElement element = nodeUser.toElement();
@@ -255,6 +260,20 @@ void ModelAudio::getRecommended(const QString& idUser)
 {
     QUrlQuery query("https://api.vk.com/method/audio.getRecommendations.xml");
     query.addQueryItem("user_id", idUser);
+    query.addQueryItem("count", "1000");
+    query.addQueryItem("v", "5.24");
+    query.addQueryItem("access_token", m_token);
+
+    QNetworkAccessManager* manager = new QNetworkAccessManager(this);
+    QNetworkReply* reply = manager->get(QNetworkRequest(makeWorkUrl(query.toString())));
+    this->connect(manager, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
+    this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
+}
+
+void ModelAudio::getPopular(const QString& id)
+{
+    QUrlQuery query("https://api.vk.com/method/audio.getPopular.xml");
+    query.addQueryItem("genre_id", id);
     query.addQueryItem("count", "1000");
     query.addQueryItem("v", "5.24");
     query.addQueryItem("access_token", m_token);

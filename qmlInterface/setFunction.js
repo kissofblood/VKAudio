@@ -13,9 +13,8 @@ function currentMidFriend(currentIndex) {
 }
 
 function setVisibleAdd(value) {
-    for(var i = 0; i < vkAudioModel.length; i++) {
+    for(var i = 0; i < vkAudioModel.length; i++)
         vkAudioModel[i].visibleImageAdd = value
-    }
 }
 
 function setVisibleCancel(value) {

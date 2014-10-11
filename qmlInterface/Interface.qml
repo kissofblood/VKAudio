@@ -1,6 +1,5 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
-import QtQuick.Dialogs 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import QtGraphicalEffects 1.0
@@ -29,6 +28,8 @@ Item {
     signal selectLoopTrack(bool value)
     signal selectRandomTrack(bool value)
     signal selectPlaylistFriend(string id)
+    signal selectPlaylistRecommended(string id)
+    signal selectPlaylistPopular(string id)
     signal selectPlaylistMy()
     signal clickedDownloadTrack(string name)
     signal returnPressedSearchTrack(string search)
@@ -38,7 +39,6 @@ Item {
     signal deleteTrack();
     signal uploadTrack();
     signal returnPressedSearchFriend(string text)
-    signal recommendedPlaylist(string idUser)
 
     width: 800
     height: 1280
@@ -1099,8 +1099,6 @@ Item {
                     if(text.length != 0)
                     {
                         item.returnPressedGlobalSearchTrack(text)
-                        Script.setVisibleAdd(true)
-                        Script.setVisibleCancel(false)
                         item.deleteTrack()
                     }
                     else
@@ -1118,41 +1116,128 @@ Item {
             }
 
             ScrollView {
+                id: scrollViewRightPanel
                 anchors.top: globalSearchTrack.bottom
                 anchors.topMargin: 5
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.maximumWidth: rightPanel.width - 9
-                Layout.minimumHeight: rightPanel.height - globalSearchTrack.height
+                Layout.minimumHeight: rightPanel.height - globalSearchTrack.height - 5
                 flickableItem.interactive: true
                 style: scrollViewHandle
 
-                Rectangle {
-                    id: recommendedRec
-                    color: clickedRecommended.pressed ? "#222" : "black"
-                    width: rightPanel.width - 22
-                    height: 40
-                    border.width: 2
-                    border.color: "#33b5e5"
-                    radius: 6
+                ColumnLayout {
+                    anchors.fill: scrollViewRightPanel
 
-                    Text {
-                        anchors.centerIn: recommendedRec
-                        text: "Рекомендация"
-                        font.pixelSize: 20
-                        color: "white"
+                    Rectangle {
+                        id: recommendedRec
+                        color: clickedRecommended.pressed ? "#222" : "black"
+                        width: rightPanel.width - 22
+                        height: 40
+                        border.width: 2
+                        border.color: "#33b5e5"
+                        radius: 6
+
+                        Text {
+                            anchors.centerIn: recommendedRec
+                            text: "Рекомендация"
+                            font.pixelSize: 20
+                            color: "white"
+                        }
+
+                        MouseArea {
+                            id: clickedRecommended
+                            anchors.fill: recommendedRec
+                            onReleased: {
+                                if(!friendAudio)
+                                    item.selectPlaylistRecommended(connectVkAudio.getIdMy())
+                                else
+                                {
+                                    var index = Script.currentMidFriend(pathView.currentIndex)
+                                    item.recommendedPlaylist(vkFriendModel[index].idFriend)
+                                }
+                            }
+                        }
                     }
 
-                    MouseArea {
-                        id: clickedRecommended
-                        anchors.fill: recommendedRec
-                        onReleased: {
-                            if(!friendAudio)
-                                item.recommendedPlaylist(connectVkAudio.getIdMy())
-                            else
-                            {
-                                var index = Script.currentMidFriend(pathView.currentIndex)
-                                item.recommendedPlaylist(vkFriendModel[index].idFriend)
+                    Rectangle {
+                        id: popularRect
+                        color: clickedPopular.pressed ? "#222" : "black"
+                        width: rightPanel.width - 22
+                        height: 40
+                        border.width: 2
+                        border.color: "#33b5e5"
+                        radius: 6
+
+                        Text {
+                            anchors.centerIn: popularRect
+                            text: "Популярные"
+                            font.pixelSize: 20
+                            color: "white"
+                        }
+
+                        MouseArea {
+                            id: clickedPopular
+                            anchors.fill: popularRect
+                            onReleased: {
+                                listGenre.visible = true
+                            }
+                        }
+                    }
+
+                    ListView {
+                        id: listGenre
+                        width: rightPanel.width - 22
+                        height: 575
+                        spacing: 2
+                        interactive: false
+                        visible: false
+                        model: ListModel {
+                            ListElement { genre: "Rock"; genreId: "1"; }
+                            ListElement { genre: "Pop"; genreId: "2"; }
+                            ListElement { genre: "Rap & Hip-Hop"; genreId: "3"; }
+                            ListElement { genre: "Easy Listening"; genreId: "4"; }
+                            ListElement { genre: "Dance & House"; genreId: "5"; }
+                            ListElement { genre: "Instrumental"; genreId: "6"; }
+                            ListElement { genre: "Metal"; genreId: "7"; }
+                            ListElement { genre: "Alternative"; genreId: "21"; }
+                            ListElement { genre: "Dubstep"; genreId: "8"; }
+                            ListElement { genre: "Jazz & Blues"; genreId: "9"; }
+                            ListElement { genre: "Drum & Bass"; genreId: "10"; }
+                            ListElement { genre: "Trance"; genreId: "11"; }
+                            ListElement { genre: "Chanson"; genreId: "12"; }
+                            ListElement { genre: "Ethnic"; genreId: "13"; }
+                            ListElement { genre: "Acoustic & Vocal"; genreId: "14"; }
+                            ListElement { genre: "Reggae"; genreId: "15"; }
+                            ListElement { genre: "Classical"; genreId: "16"; }
+                            ListElement { genre: "Indie Pop"; genreId: "17"; }
+                            ListElement { genre: "Speech"; genreId: "19"; }
+                            ListElement { genre: "Electropop & Disco"; genreId: "22"; }
+                            ListElement { genre: "Other"; genreId: "18"; }
+                        }
+                        delegate: Rectangle {
+                            id: genreDelegat
+                            color: clikedGenreDelegat.pressed ? "#222" : "black"
+                            width: rightPanel.width - 22
+                            height: 25
+                            border.width: 1
+                            border.color: "#33b5e5"
+                            radius: 6
+
+                            Text {
+                                id: txtGenre
+                                anchors.centerIn: genreDelegat
+                                text: genre
+                                font.pixelSize: 20
+                                color: "white"
+                            }
+
+                            MouseArea {
+                                id: clikedGenreDelegat
+                                anchors.fill: genreDelegat
+                                onReleased: {
+                                    item.selectPlaylistPopular(genreId)
+                                }
                             }
                         }
                     }

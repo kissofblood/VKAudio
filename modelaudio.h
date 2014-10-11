@@ -67,6 +67,7 @@ public slots:
     void addTrack(const QString& trackId, const QString& userId);
     void globalSearchAudio(const QString& artist);
     void getRecommended(const QString& idUser);
+    void getPopular(const QString& id);
 
 private slots:
     void parserAudio(QNetworkReply* reply);

@@ -53,7 +53,8 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(deleteTrack()), SLOT(deleteAllTrack()));
     this->connect(item, SIGNAL(uploadTrack()), SLOT(openFileForUpload()));
     this->connect(item, SIGNAL(returnPressedSearchFriend(QString)), SLOT(filterFriend(QString)));
-    this->connect(item, SIGNAL(recommendedPlaylist(QString)), m_modelAudio, SLOT(getRecommended(QString)));
+    this->connect(item, SIGNAL(selectPlaylistRecommended(QString)), m_modelAudio, SLOT(getRecommended(QString)));
+    this->connect(item, SIGNAL(selectPlaylistPopular(QString)), m_modelAudio, SLOT(getPopular(QString)));
 
 
     this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
@@ -251,7 +252,7 @@ void VkAudio::openFileForUpload()
 
 void VkAudio::filterFriend(const QString& text)
 {
-    QList<QObject*> result;
+    /*QList<QObject*> result;
     for(QObject* objectModel : m_propertyModelFriend_)
     {
         PropertyModelFriend* propertyModel = qobject_cast<PropertyModelFriend*>(objectModel);
@@ -259,5 +260,5 @@ void VkAudio::filterFriend(const QString& text)
             result.push_back(objectModel);
     }
     QQmlContext* context = m_quickView->rootContext();
-    context->setContextProperty("vkFriendModel", QVariant::fromValue(result));
+    context->setContextProperty("vkFriendModel", QVariant::fromValue(result));*/
 }
