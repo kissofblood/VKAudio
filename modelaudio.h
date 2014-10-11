@@ -9,10 +9,7 @@
 #include <QString>
 #include <QVector>
 #include <QHash>
-#include <QByteArray>
 #include <QEventLoop>
-#include <QPixmap>
-#include <QStringList>
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
@@ -56,7 +53,7 @@ public:
     void notifyAudioObservers() override;
     void notifyFriendObservers() override;
     void deleteTrack(const QString& trackId, const QString& userId);
-    void uploadServerTrack(QFile* data);
+    void uploadServerTrack(const QByteArray& data);
     void getPlaylistMy();
     void getPlaylistFriend(const QString& id);
     void globalSearchAudio(const QString& artist);

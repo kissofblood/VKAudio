@@ -12,3 +12,10 @@ function currentMidFriend(currentIndex) {
     return currentIndexMid - pathView.count
 }
 
+function findFriend() {
+    if(indexTextSearchFriend === arrayTextSearchFriend.length)
+        indexTextSearchFriend = 0
+    pathView.positionViewAtIndex(arrayTextSearchFriend[indexTextSearchFriend], PathView.Center)
+    indexTextSearchFriend += 1
+}
+

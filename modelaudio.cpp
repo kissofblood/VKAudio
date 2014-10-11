@@ -322,42 +322,20 @@ void ModelAudio::deleteTrack(const QString& trackId, const QString& userId)
     this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
 }
 
-void ModelAudio::uploadServerTrack(QFile* data)
+void ModelAudio::uploadServerTrack(const QByteArray& data)
 {
-    //?????????????????????????????????????????????????
     QUrlQuery queryUpload("https://api.vk.com/method/audio.getUploadServer.xml");
     queryUpload.addQueryItem("v", "5.24");
     queryUpload.addQueryItem("access_token", m_token);
 
- /*   auto multipart = new QHttpMultiPart (QHttpMultiPart::FormDataType);
-    const auto& path = info.FilePath_;
-    auto file = new QFile (path, multipart);
-    file->open (QIODevice::ReadOnly);
-    QHttpPart filePart;
-    const auto& disp = QString ("form-data; name=\"file1\"; filename=\"%1\"")
-    .arg (QFileInfo (path).fileName ());
-    filePart.setHeader (QNetworkRequest::ContentDispositionHeader, disp);
-    filePart.setBodyDevice (file);
-    multipart->append (filePart);
-*/
-
-     /*QHttpMultiPart* multipart = new QHttpMultiPart (QHttpMultiPart::FormDataType);
-
-         QHttpPart filePart;
-
-         filePart.setHeader (QNetworkRequest::ContentDispositionHeader, "form-data; name=\"file1\"; filename=\"track1\"");
-         filePart.setBodyDevice (data);
-         multipart->append (filePart);
-
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
     QNetworkRequest request(makeWorkUrl(queryUpload.toString()));
-    //request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data");
-    QNetworkReply* reply = manager->post(request, multipart);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data");
+    QNetworkReply* reply = manager->post(request, data);
 
     this->connect(manager, &QNetworkAccessManager::finished, [](QNetworkReply* reply)
     {
        qDebug()<<reply->readAll();
-    });*/
-
-
+    });
+    this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
 }

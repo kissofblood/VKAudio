@@ -52,7 +52,6 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(removeTrack(QString, QString, bool)), SLOT(pushRemoveTrack(QString, QString, bool)));
     this->connect(item, SIGNAL(deleteTrack()), SLOT(deleteAllTrack()));
     this->connect(item, SIGNAL(uploadTrack()), SLOT(openFileForUpload()));
-    this->connect(item, SIGNAL(returnPressedSearchFriend(QString)), SLOT(filterFriend(QString)));
     this->connect(item, SIGNAL(selectPlaylistRecommended(QString)), SLOT(getRecommendedModel(QString)));
     this->connect(item, SIGNAL(selectPlaylistPopular(QString)),     SLOT(getPopularModel(QString)));
 
@@ -245,22 +244,10 @@ void VkAudio::deleteAllTrack()
 void VkAudio::openFileForUpload()
 {
     QString pathFile = QFileDialog::getOpenFileName(this, "Open File", QString(), "*.mp3");
-    QFile* fileOpen = new QFile(pathFile);
-    if(fileOpen->open(QIODevice::ReadOnly))
-        m_modelAudio->uploadServerTrack(fileOpen);
-}
-
-void VkAudio::filterFriend(const QString& text)
-{
-    /*QList<QObject*> result;
-    for(QObject* objectModel : m_propertyModelFriend_)
-    {
-        PropertyModelFriend* propertyModel = qobject_cast<PropertyModelFriend*>(objectModel);
-        if(propertyModel->nameFriend().contains(text, Qt::CaseInsensitive))
-            result.push_back(objectModel);
-    }
-    QQmlContext* context = m_quickView->rootContext();
-    context->setContextProperty("vkFriendModel", QVariant::fromValue(result));*/
+    QFile fileOpen(pathFile);
+    if(fileOpen.open(QIODevice::ReadOnly))
+        m_modelAudio->uploadServerTrack(fileOpen.readAll());
+    fileOpen.close();
 }
 
 void VkAudio::getPlaylistMyModel()

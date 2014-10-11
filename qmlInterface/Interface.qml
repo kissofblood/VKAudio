@@ -19,6 +19,9 @@ Item {
     property bool addAndCancel: true
     property bool friendAudio: false
     property bool hideListGenre: false
+    property string textSearchFriend: ""
+    property int indexTextSearchFriend: 0
+    property var arrayTextSearchFriend: new Array
 
     signal selectIdTrack(string id)
     signal positionTrackChange(int value)
@@ -40,7 +43,6 @@ Item {
     signal removeTrack(string trackId, string userId, bool remover)
     signal deleteTrack();
     signal uploadTrack();
-    signal returnPressedSearchFriend(string text)
 
     width: 800
     height: 1280
@@ -599,7 +601,7 @@ Item {
         height: 40
         font.pixelSize: 25
         placeholderText: "search"
-        onEditingFinished: item.returnPressedSearchTrack(text)
+        onAccepted: item.returnPressedSearchTrack(text)
         style: styleTextField
 
         FastBlur {
@@ -1062,7 +1064,38 @@ Item {
                     placeholderText: "search"
                     style: styleTextField
                     maximumLength: 11
-                    onEditingFinished: item.returnPressedSearchFriend(text)
+                    Keys.onPressed: {
+                        if(event.key === 16777219)
+                            textColor = "white"
+                    }
+                    onAccepted: {
+                        if(text.length == 0)
+                            return
+
+                        if(textSearchFriend == text)
+                            Script.findFriend()
+                        else
+                        {
+                            textSearchFriend = text
+                            indexTextSearchFriend = 0
+                            arrayTextSearchFriend = []
+                            for(var i = 0; i < vkFriendModel.length; i++)
+                            {
+                                var friend = vkFriendModel[i].nameFriend.toLowerCase()
+                                var input = text.toLowerCase()
+                                if(indefinite.search(input) == -1)
+                                    if(friend.search(input) !== -1)
+                                        arrayTextSearchFriend.push(i)
+                            }
+                            if(arrayTextSearchFriend.length == 0)
+                                textColor = "red"
+                            else
+                            {
+                                textColor = "white"
+                                Script.findFriend()
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1096,8 +1129,8 @@ Item {
                 Layout.maximumWidth: rightPanel.width - 5
                 Layout.minimumHeight: 40
                 font.pixelSize: 25
-                placeholderText: "search"
-                onEditingFinished: {
+                placeholderText: "global search"
+                onAccepted: {
                     searchTrack.text = ""
                     if(text.length != 0)
                     {
@@ -1144,7 +1177,7 @@ Item {
 
                         Text {
                             anchors.centerIn: myAudio
-                            text: "Мои аудиозаписи"
+                            text: "My Audiorecord"
                             font.pixelSize: 20
                             color: "white"
                         }
@@ -1164,6 +1197,40 @@ Item {
                     }
 
                     Rectangle {
+                        id: currentPlaylist
+                        color: clickeCurrentPlaylist.pressed ? "#222" : "black"
+                        width: rightPanel.width - 22
+                        height: 40
+                        border.width: 2
+                        border.color: "#33b5e5"
+                        radius: 6
+
+                        Text {
+                            anchors.centerIn: currentPlaylist
+                            text: "Playlist User"
+                            font.pixelSize: 20
+                            color: "white"
+                        }
+
+                        MouseArea {
+                            id: clickeCurrentPlaylist
+                            anchors.fill: currentPlaylist
+                            onReleased: {
+                                addAndCancel = false
+                                searchTrack.text = ""
+                                globalSearchTrack.text = ""
+                                if(!friendAudio)
+                                    item.selectPlaylistMy()
+                                else
+                                {
+                                    var index = Script.currentMidFriend(pathView.currentIndex)
+                                    item.selectPlaylistFriend(vkFriendModel[index].idFriend)
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
                         id: recommendedRec
                         color: clickedRecommended.pressed ? "#222" : "black"
                         width: rightPanel.width - 22
@@ -1174,7 +1241,7 @@ Item {
 
                         Text {
                             anchors.centerIn: recommendedRec
-                            text: "Рекомендация"
+                            text: "Recommendation"
                             font.pixelSize: 20
                             color: "white"
                         }
@@ -1208,7 +1275,7 @@ Item {
 
                         Text {
                             anchors.centerIn: popularRect
-                            text: "Популярные"
+                            text: "Popular"
                             font.pixelSize: 20
                             color: "white"
                         }

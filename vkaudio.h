@@ -16,7 +16,6 @@
 #include <QUrlQuery>
 #include <QHBoxLayout>
 #include <QTime>
-#include <QIcon>
 #include <QTimer>
 #include <QFileDialog>
 #include <QFile>
@@ -68,7 +67,6 @@ private slots:
     void pushRemoveTrack(const QString& trackId, const QString& userId, bool remove);
     void deleteAllTrack();
     void openFileForUpload();
-    void filterFriend(const QString& text);
     void getPlaylistMyModel();
     void getRecommendedModel(const QString& idUser);
     void getPopularModel(const QString& id);
