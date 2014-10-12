@@ -35,7 +35,7 @@ void ModelAudio::parserAudio(QNetworkReply* reply)
             else if(element.tagName() == "duration")
                 infoTrack.duration = element.text().toInt();
             else if(element.tagName() == "url")
-                infoTrack.url = QUrl(element.text());
+                infoTrack.url = element.text();
             else if(element.tagName() == "owner_id")
                 infoTrack.ownerId = element.text();
             nodeInfoTrack = nodeInfoTrack.nextSibling();
@@ -128,7 +128,7 @@ QUrl ModelAudio::makeWorkUrl(const QString& url)
             result.replace(i, 1, '?');
             break;
         }
-    return qMove(QUrl(result));
+    return result;
 }
 
 QUrl ModelAudio::findUrlTrack(const QString& id)
@@ -196,8 +196,6 @@ void ModelAudio::findPlaylist(const QString& token)
     QEventLoop loop;
     QNetworkReply* reply = loadFriend->get(QNetworkRequest(makeWorkUrl(queryFriend.toString())));
     this->connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
-    //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
-       // std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(loadFriend, &QNetworkAccessManager::finished, this, &ModelAudio::parserFriend);
     this->connect(reply, &QNetworkReply::finished, loadFriend, &QNetworkAccessManager::deleteLater);
     loop.exec();
@@ -216,8 +214,6 @@ void ModelAudio::globalSearchAudio(const QString& artist)
 
     QNetworkAccessManager* loadGlobalAudio = new QNetworkAccessManager(this);
     QNetworkReply* reply = loadGlobalAudio->get(QNetworkRequest(makeWorkUrl(query.toString())));
-    //this->connect(reply, &QNetworkReply::downloadProgress, std::bind(&ModelAudio::progressDownload, this,
-      //  std::bind(std::divides<qint64>(), std::bind(std::multiplies<qint64>(), 100, std::placeholders::_1), std::placeholders::_2)));
     this->connect(loadGlobalAudio, &QNetworkAccessManager::finished, this, &ModelAudio::parserAudio);
     this->connect(reply, &QNetworkReply::finished, loadGlobalAudio, &QNetworkAccessManager::deleteLater);
 }

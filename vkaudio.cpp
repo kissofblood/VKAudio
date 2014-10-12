@@ -54,13 +54,6 @@ VkAudio::VkAudio(QWidget* parent) : QWidget(parent)
     this->connect(item, SIGNAL(uploadTrack()), SLOT(openFileForUpload()));
     this->connect(item, SIGNAL(selectPlaylistRecommended(QString)), SLOT(getRecommendedModel(QString)));
     this->connect(item, SIGNAL(selectPlaylistPopular(QString)),     SLOT(getPopularModel(QString)));
-
-
-    this->connect(m_modelAudio, &ModelAudio::progressDownload, this, [this](qint64 value)
-    {
-        qDebug()<<value;
-        //emit progressDownloadTrack(value);
-    });
 }
 
 VkAudio::~VkAudio()
@@ -109,6 +102,8 @@ void VkAudio::updatePlaylist(const QVector<std::tuple<IdTrack, Artist, Title, Du
     }
     QQmlContext* context = m_quickView->rootContext();
     context->setContextProperty("vkAudioModel", QVariant::fromValue(m_propertyModelAudio_));
+
+    emit enableTrue();
 }
 
 QUrl VkAudio::getUrlAvatarMy() const

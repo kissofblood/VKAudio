@@ -52,6 +52,7 @@ signals:
     void mediaDurationChanged(qint64 duration);
     void idTrackChanged(bool value, const QString& id);
     void nextTrackDefault();
+    void enableTrue();
 
 private slots:
     void checkUrl(const QUrl& url);

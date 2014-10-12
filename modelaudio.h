@@ -60,9 +60,6 @@ public:
     void getRecommended(const QString& idUser);
     void getPopular(const QString& id);
 
-signals:
-    void progressDownload(qint64 value);
-
 public slots:
     void addTrack(const QString& trackId, const QString& userId);
 

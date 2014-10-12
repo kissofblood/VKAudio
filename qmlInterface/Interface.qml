@@ -15,7 +15,7 @@ Item {
     property bool isLoop: false
     property bool isRandom: false
     property string indefinite: "indefinite"
-    property real fastBlurRadius: -1
+    property real fastBlurRadius: 5
     property bool addAndCancel: true
     property bool friendAudio: false
     property bool hideListGenre: false
@@ -86,6 +86,7 @@ Item {
                     }
         }
         onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
+        onEnableTrue: fastBlurRadius = -1
     }
 
     Component {
@@ -217,6 +218,7 @@ Item {
                     onClicked: {
                         fastBlurRadius = 5
                         listFriend.visible = true
+                        rightPanel.enabled = false
                         inputSearchFriend.focus = true
                     }
                 }
@@ -391,7 +393,7 @@ Item {
 
             Rectangle {
                 id: loopTrack
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenter: parent.verticalenableTrueCenter
                 Layout.fillWidth: true
                 Layout.minimumWidth: 50
                 Layout.minimumHeight: 60
@@ -1010,9 +1012,9 @@ Item {
                         anchors.fill: okSearchFriend
                         onReleased: {
                             listFriend.visible = false
+                            rightPanel.enabled = true
                             searchTrack.text = ""
                             globalSearchTrack.text = ""
-                            fastBlurRadius = -1
                             item.deleteTrack()
                             if(inputSearchFriend.text === connectVkAudio.getNameAvatarMy().substring(0, inputSearchFriend.maximumLength))
                             {
@@ -1051,6 +1053,7 @@ Item {
                         anchors.fill: cancelSearchFriend
                         onReleased: {
                             listFriend.visible = false
+                            rightPanel.enabled = true
                             fastBlurRadius = -1
                         }
                     }
@@ -1150,6 +1153,13 @@ Item {
                     }
                 }
                 style: styleTextField
+
+                FastBlur {
+                    anchors.fill: globalSearchTrack
+                    source: globalSearchTrack
+                    radius: fastBlurRadius
+                    transparentBorder: true
+                }
             }
 
             ScrollView {
@@ -1175,6 +1185,13 @@ Item {
                         border.color: "#33b5e5"
                         radius: 6
 
+                        FastBlur {
+                            anchors.fill: myAudio
+                            source: myAudio
+                            radius: fastBlurRadius
+                            transparentBorder: true
+                        }
+
                         Text {
                             anchors.centerIn: myAudio
                             text: "My Audiorecord"
@@ -1188,6 +1205,7 @@ Item {
                             onReleased: {
                                 addAndCancel = false
                                 friendAudio = false
+                                fastBlurRadius = 5
                                 searchTrack.text = ""
                                 globalSearchTrack.text = ""
                                 item.selectPlaylistMy()
@@ -1205,6 +1223,13 @@ Item {
                         border.color: "#33b5e5"
                         radius: 6
 
+                        FastBlur {
+                            anchors.fill: currentPlaylist
+                            source: currentPlaylist
+                            radius: fastBlurRadius
+                            transparentBorder: true
+                        }
+
                         Text {
                             anchors.centerIn: currentPlaylist
                             text: "Playlist User"
@@ -1218,6 +1243,7 @@ Item {
                             onReleased: {
                                 addAndCancel = false
                                 searchTrack.text = ""
+                                fastBlurRadius = 5
                                 globalSearchTrack.text = ""
                                 if(!friendAudio)
                                     item.selectPlaylistMy()
@@ -1239,6 +1265,13 @@ Item {
                         border.color: "#33b5e5"
                         radius: 6
 
+                        FastBlur {
+                            anchors.fill: recommendedRec
+                            source: recommendedRec
+                            radius: fastBlurRadius
+                            transparentBorder: true
+                        }
+
                         Text {
                             anchors.centerIn: recommendedRec
                             text: "Recommendation"
@@ -1252,6 +1285,7 @@ Item {
                             onReleased: {
                                 searchTrack.text = ""
                                 globalSearchTrack.text = ""
+                                fastBlurRadius = 5
                                 addAndCancel = false
                                 if(!friendAudio)
                                     item.selectPlaylistRecommended(connectVkAudio.getIdMy())
@@ -1272,6 +1306,13 @@ Item {
                         border.width: 2
                         border.color: "#33b5e5"
                         radius: 6
+
+                        FastBlur {
+                            anchors.fill: popularRect
+                            source: popularRect
+                            radius: fastBlurRadius
+                            transparentBorder: true
+                        }
 
                         Text {
                             anchors.centerIn: popularRect
@@ -1337,6 +1378,13 @@ Item {
                             border.color: "#33b5e5"
                             radius: 6
 
+                            FastBlur {
+                                anchors.fill: genreDelegat
+                                source: genreDelegat
+                                radius: fastBlurRadius
+                                transparentBorder: true
+                            }
+
                             Text {
                                 id: txtGenre
                                 anchors.centerIn: genreDelegat
@@ -1351,6 +1399,7 @@ Item {
                                 onReleased: {
                                     addAndCancel = false
                                     searchTrack.text = ""
+                                    fastBlurRadius = 5
                                     globalSearchTrack.text = ""
                                     item.selectPlaylistPopular(genreId)
                                 }
