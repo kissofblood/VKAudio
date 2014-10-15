@@ -20,7 +20,6 @@
 #include <functional>
 #include <algorithm>
 
-
 #include <QtWidgets>
 #include <QtNetwork>
 
@@ -53,7 +52,7 @@ public:
     void notifyAudioObservers() override;
     void notifyFriendObservers() override;
     void deleteTrack(const QString& trackId, const QString& userId);
-    void uploadServerTrack(const QByteArray& data);
+    void uploadServerTrack(QFile* bmp);
     void getPlaylistMy();
     void getPlaylistFriend(const QString& id);
     void globalSearchAudio(const QString& artist);

@@ -239,10 +239,9 @@ void VkAudio::deleteAllTrack()
 void VkAudio::openFileForUpload()
 {
     QString pathFile = QFileDialog::getOpenFileName(this, "Open File", QString(), "*.mp3");
-    QFile fileOpen(pathFile);
-    if(fileOpen.open(QIODevice::ReadOnly))
-        m_modelAudio->uploadServerTrack(fileOpen.readAll());
-    fileOpen.close();
+    QFile* fileOpen = new QFile(pathFile);
+    if(fileOpen->open(QIODevice::ReadOnly))
+        m_modelAudio->uploadServerTrack(fileOpen);
 }
 
 void VkAudio::getPlaylistMyModel()

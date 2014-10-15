@@ -11,7 +11,6 @@
 #include <QBuffer>
 #include <QList>
 #include <QObject>
-#include <QPair>
 #include <QUrl>
 #include <QUrlQuery>
 #include <QHBoxLayout>
@@ -32,9 +31,6 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 #include <QtMultimedia/QMediaPlayer>
-
-
-#include <QtWidgets>
 
 class VkAudio : public QWidget, public Observer::AbstractObserver
 {

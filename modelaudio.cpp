@@ -318,7 +318,7 @@ void ModelAudio::deleteTrack(const QString& trackId, const QString& userId)
     this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
 }
 
-void ModelAudio::uploadServerTrack(const QByteArray& data)
+void ModelAudio::uploadServerTrack(QFile* bmp)
 {
     QUrlQuery queryUpload("https://api.vk.com/method/audio.getUploadServer.xml");
     queryUpload.addQueryItem("v", "5.24");
@@ -326,12 +326,47 @@ void ModelAudio::uploadServerTrack(const QByteArray& data)
 
     QNetworkAccessManager* manager = new QNetworkAccessManager(this);
     QNetworkRequest request(makeWorkUrl(queryUpload.toString()));
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data");
-    QNetworkReply* reply = manager->post(request, data);
+
+    QByteArray file = bmp->readAll();
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpPart imagePart;
+    imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("audio/mp3"));
+    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"audio\"; filename=\"track.mp3\""));
+    imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("multipart/form-data; name=\"audio\"; filename=\"track.mp3\""));
+    imagePart.setHeader(QNetworkRequest::ContentLengthHeader, QVariant(file.length()));
+
+    imagePart.setBody(file.toBase64());
+    bmp->setParent(multiPart);
+    multiPart->append(imagePart);
+
+
+    QNetworkReply* reply = manager->post(request,  multiPart);
+
 
     this->connect(manager, &QNetworkAccessManager::finished, [](QNetworkReply* reply)
     {
        qDebug()<<reply->readAll();
     });
     this->connect(reply, &QNetworkReply::finished, manager, &QNetworkAccessManager::deleteLater);
+
+    /*QByteArray file = bmp->readAll();
+QNetworkAccessManager manager(this);
+QNetworkRequest request;
+request.setUrl(QUrl(result));
+QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+QHttpPart imagePart;
+imagePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("image/jpg"));
+imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"photo\"; filename=\"kartinka.jpg\""));
+imagePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("multipart/form-data; name=\"photo\"; filename=\"kartinka.jpg\""));
+imagePart.setHeader(QNetworkRequest::ContentLengthHeader, QVariant(file.length()));
+
+imagePart.setBody(file.toBase64());
+bmp->setParent(multiPart);
+multiPart->append(imagePart);
+QNetworkReply Виталий Репли = manager.post(request, file.toBase64());
+QEventLoop eventLoop;
+connect(reply,SIGNAL(finished()),&eventLoop,SLOT(quit()));
+QTimer::singleShot(timeout,&eventLoop,SLOT(quit()));
+eventLoop.exec();
+}*/
 }

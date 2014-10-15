@@ -46,6 +46,7 @@ Item {
 
     width: 800
     height: 1280
+    enabled: false
 
     Connections {
         target: connectVkAudio
@@ -71,8 +72,6 @@ Item {
                     if(vkAudioModel[next].idTrack === id)
                     {
                         listView.currentIndex = next
-                        listView.model.index = next
-                        listView.displayMarginBeginning = next
                         break
                     }
             }
@@ -80,13 +79,14 @@ Item {
                     if(vkAudioModel[prev].idTrack === id)
                     {
                         listView.currentIndex = prev
-                        listView.model.index = prev
-                        listView.displayMarginBeginning = prev
                         break
                     }
         }
         onNextTrackDefault: item.selectNextTrack(vkAudioModel[listView.currentIndex].idTrack)
-        onEnableTrue: fastBlurRadius = -1
+        onEnableTrue: {
+            fastBlurRadius = -1
+            item.enabled = true
+        }
     }
 
     Component {
@@ -393,7 +393,7 @@ Item {
 
             Rectangle {
                 id: loopTrack
-                anchors.verticalCenter: parent.verticalenableTrueCenter
+                anchors.verticalCenter: parent.verticalCenter
                 Layout.fillWidth: true
                 Layout.minimumWidth: 50
                 Layout.minimumHeight: 60
@@ -1013,6 +1013,7 @@ Item {
                         onReleased: {
                             listFriend.visible = false
                             rightPanel.enabled = true
+                            item.enabled = false
                             searchTrack.text = ""
                             globalSearchTrack.text = ""
                             item.deleteTrack()
@@ -1135,6 +1136,7 @@ Item {
                 placeholderText: "global search"
                 onAccepted: {
                     searchTrack.text = ""
+                    item.enabled = false
                     if(text.length != 0)
                     {
                         item.returnPressedGlobalSearchTrack(text)
@@ -1206,6 +1208,7 @@ Item {
                                 addAndCancel = false
                                 friendAudio = false
                                 fastBlurRadius = 5
+                                item.enabled = false
                                 searchTrack.text = ""
                                 globalSearchTrack.text = ""
                                 item.selectPlaylistMy()
@@ -1244,6 +1247,7 @@ Item {
                                 addAndCancel = false
                                 searchTrack.text = ""
                                 fastBlurRadius = 5
+                                item.enabled = false
                                 globalSearchTrack.text = ""
                                 if(!friendAudio)
                                     item.selectPlaylistMy()
@@ -1286,6 +1290,7 @@ Item {
                                 searchTrack.text = ""
                                 globalSearchTrack.text = ""
                                 fastBlurRadius = 5
+                                item.enabled = false
                                 addAndCancel = false
                                 if(!friendAudio)
                                     item.selectPlaylistRecommended(connectVkAudio.getIdMy())
@@ -1400,6 +1405,7 @@ Item {
                                     addAndCancel = false
                                     searchTrack.text = ""
                                     fastBlurRadius = 5
+                                    item.enabled = false
                                     globalSearchTrack.text = ""
                                     item.selectPlaylistPopular(genreId)
                                 }

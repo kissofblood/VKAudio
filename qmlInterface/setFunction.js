@@ -18,4 +18,3 @@ function findFriend() {
     pathView.positionViewAtIndex(arrayTextSearchFriend[indexTextSearchFriend], PathView.Center)
     indexTextSearchFriend += 1
 }
-
